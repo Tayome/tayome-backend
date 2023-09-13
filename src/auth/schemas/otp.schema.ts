@@ -11,6 +11,15 @@ export class Otp {
   @Prop({ required: true, type: String })
   for: String;
 
+  @Prop({ required: true, type: String })
+  purpose: String;
+
+  @Prop({ required: true, type: Boolean, default: false })
+  isUsed: Boolean;
+
+  @Prop({ required: true, type: Number, default: 0 })
+  resendCount: Number;
+
   @Prop()
   createdAt: Date;
 
