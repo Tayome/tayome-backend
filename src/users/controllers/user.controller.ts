@@ -11,8 +11,6 @@ export class UserController {
     constructor(private userService: UserService) {}
 
 	@Post("/onboardingUser")
-    @UseGuards(AuthGuard(), RolesGuard)
-    @Roles(RoleType.USER)
     async onboardingUser(
         @Body() onboardingUserDto: OnboardingUserDto,
     ): Promise<{ message: String; data: any }> {

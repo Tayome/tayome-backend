@@ -42,8 +42,8 @@ export class Patients {
     @Prop({ required: true, type: String })
     accountType: String;
 
-    @Prop({ required: true, type: String })
-    medicineStartDate: String;
+    @Prop({ required: true, type: Date })
+    medicineStartDate: Date;
 
     @Prop({ required: true, type: String })
     medicalCondition: String;
