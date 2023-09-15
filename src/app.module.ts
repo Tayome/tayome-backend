@@ -4,6 +4,7 @@ import { UsersModule } from "./users/users.module";
 import { ConfigModule } from "@nestjs/config";
 import { MongooseModule } from "@nestjs/mongoose";
 import { UtilsModule } from "./utils/utils.module";
+import { ClinicModule } from './clinic/clinic.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UtilsModule } from "./utils/utils.module";
     AuthModule,
     UsersModule,
     UtilsModule,
+    ClinicModule,
   ],
   controllers: [],
   providers: [],
