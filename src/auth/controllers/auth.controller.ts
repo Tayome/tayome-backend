@@ -13,7 +13,7 @@ import { ResetPasswordDto } from "../dto/reset-password.dto";
 
 @Controller("auth")
 export class AuthController {
-    constructor(private authservice: AuthService, private readonly configService: ConfigService) {}
+    constructor(private authService: AuthService, private readonly configService: ConfigService) {}
 
     //   @Get("/google")
     //   @UseGuards(AuthGuard("google"))
@@ -68,7 +68,7 @@ export class AuthController {
     @HttpCode(200)
     @Post("/request-otp")
     async requestOTP(@Body() requestOtpDto: RequestOtpDto) {
-        const createOtp = await this.authservice.createOtp(requestOtpDto);
+        const createOtp = await this.authService.createOtp(requestOtpDto);
         return {
             message: "OTP generated",
             data: {
@@ -80,7 +80,7 @@ export class AuthController {
     @HttpCode(200)
     @Post("/verify-otp")
     async verifyOTP(@Body() verifyOtpDto: VerifyOtpDto) {
-        const verifyOtp = await this.authservice.verifyOtp(verifyOtpDto);
+        const verifyOtp = await this.authService.verifyOtp(verifyOtpDto);
         return {
             message: "OTP verified",
             data: verifyOtp,
@@ -90,10 +90,21 @@ export class AuthController {
     @HttpCode(200)
     @Post("/login")
     async login(@Body() loginDto: LoginDto) {
-        const data = await this.authservice.login(loginDto);
+        const data = await this.authService.login(loginDto);
 
         return {
             message: "User Login",
+            data: data,
+        };
+    }
+
+    @HttpCode(201)
+    @Post("/register")
+    async registerUser(@Body() registerUserDto: RegisterUserDto): Promise<object> {
+        const data = await this.authService.registerUser(registerUserDto);
+
+        return {
+            message: "User registered",
             data: data,
         };
     }
@@ -105,7 +116,7 @@ export class AuthController {
     @HttpCode(200)
     @Post("/forget-password-request-otp")
     async forgetPasswordRequestOtp(@Body() requestOtpDto: RequestOtpDto) {
-        const createOtp = await this.authservice.forgetPasswordOtp(requestOtpDto);
+        const createOtp = await this.authService.forgetPasswordOtp(requestOtpDto);
 
         return {
             message: "OTP genrated",
@@ -118,7 +129,7 @@ export class AuthController {
     @HttpCode(200)
     @Post("/reset-password")
     async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-        const createOtp = await this.authservice.resetPassword(resetPasswordDto);
+        const createOtp = await this.authService.resetPassword(resetPasswordDto);
 
         return {
             message: "OTP genrated",

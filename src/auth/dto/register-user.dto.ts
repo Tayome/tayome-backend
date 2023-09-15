@@ -7,11 +7,11 @@ export class RegisterUserDto {
   type: string;
 
   @Length(2, 50)
-  firstname: string;
+  firstName: string;
 
   @IsOptional()
   @Length(2, 50)
-  lastname: string;
+  lastName: string;
 
   @ValidateIf(req => req.type === AuthTypes.EMAIL)
   @Transform(param => param.value.toLowerCase())

@@ -11,10 +11,10 @@ export class User {
   _id: string;
 
   @Prop({ type: String })
-  firstname: String;
+  firstName: String;
 
   @Prop({ type: String })
-  lastname: String;
+  lastName: String;
 
   @Prop({ required: true, enum: AuthTypes })
   type: String;

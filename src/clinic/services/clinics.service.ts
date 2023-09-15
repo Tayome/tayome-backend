@@ -27,4 +27,8 @@ export class ClinicsService {
         let uploadData = await this.UploadService.upload(qrBuffer, "qrCode/", clinicDetails["clinicName"]+".png");
         return uploadData.Location;
     }
+
+    async clinicsList(): Promise<any>{
+        return await this.ClinicDetailsModel.find();
+    }
 }

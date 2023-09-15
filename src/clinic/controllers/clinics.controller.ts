@@ -25,4 +25,15 @@ export class ClinicsController {
             throw new Error("Error while adding clinic details");
         }
     }
+
+    @Post("/list")
+    // @UseGuards(AuthGuard(), RolesGuard)
+    // @Roles(RoleType.ADMIN)
+    async clinicsList(): Promise<{message: String, data: any }>{
+        let clinicsList = await this.clinicService.clinicsList();        
+        return {
+            message: "Clinics list",
+            data: clinicsList
+        };
+    }
 }

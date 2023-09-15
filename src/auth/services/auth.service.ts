@@ -70,23 +70,13 @@ export class AuthService {
     }
 
     async registerUser(registerUserDto: RegisterUserDto): Promise<object> {
-        let record = await this.OtpModel.findOne({ _id: registerUserDto.otpVerificationCode, for: registerUserDto[registerUserDto.type] }).exec();
-
-        if (!record) throw new BadRequestException("Invalid token");
-
-        const user = await this.UserModel.findOne({ [registerUserDto.type]: registerUserDto[registerUserDto.type] }).exec();
-
-        if (user) throw new BadRequestException(`${[registerUserDto.type]} already exists`);
-
-        await this.OtpModel.findByIdAndDelete(record._id);
-
         const salt = await bcrypt.genSalt();
         const password = await this.hashPassword(registerUserDto.password, salt);
 
         const createdUser = new this.UserModel({
             type: registerUserDto.type,
-            firstname: registerUserDto.firstname,
-            lastname: registerUserDto.lastname ?? "",
+            firstName: registerUserDto.firstName,
+            lastName: registerUserDto.lastName ?? "",
             [registerUserDto.type]: registerUserDto[registerUserDto.type],
             password,
             salt,
