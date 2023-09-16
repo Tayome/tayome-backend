@@ -1,5 +1,5 @@
 export enum GenderEnum {
-    MALE = "male",
-    FEMALE = "female",
+    MALE = "Male",
+    FEMALE = "Female",
     PREFER_NOT_TO_RESPOND = "Prefer not to respond"
 }
