@@ -5,6 +5,7 @@ import { RoleType } from "src/auth/enums/role.enum";
 import { Roles } from "src/auth/decorators/roles.decorator";
 import { UserService } from "../services/user.service";
 import { OnboardingUserDto } from "../dto/onboarding-user.dto";
+import { PatientsListDto } from "../dto/patients-list.dto";
 
 @Controller("user")
 export class UserController {
@@ -18,6 +19,17 @@ export class UserController {
         return {
             message: "User Onboarded",
             data: userDetails,
+        };
+    }
+
+    @Post("/patients/list")
+    async patientsList(
+        @Body() patientsListDto: PatientsListDto,
+    ): Promise<{ message: String; data: any }> {
+        const list = await this.userService.patientsList(patientsListDto);
+        return {
+            message: "Patients List",
+            data: list,
         };
     }
 }

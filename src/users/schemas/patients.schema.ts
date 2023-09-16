@@ -6,7 +6,7 @@ export type PatientsDocument = HydratedDocument<Patients>;
 
 @Schema({ timestamps: true })
 export class Patients {
-    @Prop({ required: true, type: SchemaTypes.ObjectId, ref: "Clinics"})
+    @Prop({ required: true, type: SchemaTypes.ObjectId, ref: "ClinicsDetail"})
     clinicId: String;
 
     @Prop({ required: true, type: String })
