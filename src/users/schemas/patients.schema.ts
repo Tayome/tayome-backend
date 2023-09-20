@@ -13,19 +13,10 @@ export class Patients {
     name: String;
 
     @Prop({ required: true, type: String })
-    gender: String;
-
-    @Prop({ required: true, type: String })
     city: String;
 
     @Prop({ required: true, type: String })
     language: String;
-
-    @Prop({ required: true, type: String })
-    email: String;
-
-    @Prop({ required: true, type: String })
-    alternateEmail: String;
 
     @Prop({ required: true, type: String })
     countryCode: String;
@@ -34,22 +25,7 @@ export class Patients {
     mobile: String;
 
     @Prop({ required: true, type: String })
-    alternateCountryCode: String;
-
-    @Prop({ required: true, type: String })
-    alternateMobile: String;
-
-    @Prop({ required: true, type: String })
-    accountType: String;
-
-    @Prop({ required: true, type: Date })
-    medicineStartDate: Date;
-
-    @Prop({ required: true, type: String })
     medicalCondition: String;
-
-    @Prop({ required: true, type: String })
-    medicineName: String;
 
     @Prop({ type: String })
     notes: String;
