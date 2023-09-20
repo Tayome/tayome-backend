@@ -5,6 +5,7 @@ import { InjectConnection, InjectModel } from "@nestjs/mongoose";
 import { UploadService } from "src/utils/services/upload.service";
 import { OnboardingUserDto } from "../dto/onboarding-user.dto";
 import { Patients } from "../schemas/patients.schema";
+import { PatientsListDto } from "../dto/patients-list.dto";
 
 @Injectable()
 export class UserService {
@@ -33,5 +34,18 @@ export class UserService {
     async onboardingUser(onboardingUserDto: OnboardingUserDto): Promise<any>{
         let patientData = new this.PatientModel(onboardingUserDto);
         return await patientData.save();
+    }
+
+    async patientsList(patientsListDto: PatientsListDto): Promise<any>{
+        const pageSize = patientsListDto.pageSize ?? 10;
+        const page = patientsListDto.page ?? 1;
+        const skip = pageSize * (page - 1);
+        let sort = {};
+        
+        return await this.PatientModel.find()
+                .sort({ ...sort, createdAt: -1 })
+                .limit(pageSize)
+                .skip(skip)
+                .populate("clinicId").exec();
     }
 }
