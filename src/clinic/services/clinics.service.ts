@@ -5,6 +5,7 @@ import { ClinicsDetail } from '../schemas/clinics-detail.schema';
 import { Model } from 'mongoose';
 import { UploadService } from 'src/utils/services/upload.service';
 import * as QRCode from 'qrcode';
+import { ClinicsListDto } from '../dto/clinics-list.dto';
 
 @Injectable()
 export class ClinicsService {
@@ -28,7 +29,35 @@ export class ClinicsService {
         return uploadData.Location;
     }
 
-    async clinicsList(): Promise<any>{
-        return await this.ClinicDetailsModel.find();
+    async clinicsList(clinicsListDto: ClinicsListDto): Promise<any>{
+        const pageSize = clinicsListDto.pageSize ?? 10;
+        const page = clinicsListDto.page ?? 1;
+        const skip = pageSize * (page - 1);
+
+        const query = {};
+        const sort = {};
+        
+        if (clinicsListDto.search) {
+            const searchQueryString = clinicsListDto.search.trim().split(" ").join("|");
+
+            query["$or"] = [
+                { clinicName: { $regex: `.*${searchQueryString}.*`, $options: "i" } },
+                { mobile: { $regex: `.*${searchQueryString}.*`, $options: "i" } },
+                { email: { $regex: `.*${searchQueryString}.*`, $options: "i" } }
+            ];
+        }
+
+        const totalProm = this.ClinicDetailsModel.count(query);
+        const clinicsListProm = this.ClinicDetailsModel.find()
+                                                        .sort({...sort, createdAt: -1})
+                                                        .limit(pageSize)
+                                                        .skip(skip)
+                                                        .exec();
+        const [total, clinicsList] = await Promise.all([totalProm, clinicsListProm]);
+
+        return {
+            list: clinicsList,                    
+            total: total
+        };
     }
 }
