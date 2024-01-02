@@ -2,6 +2,8 @@ import { Body, Controller, FileTypeValidator, MaxFileSizeValidator, ParseFilePip
 import { CampaignService } from "../services/campaign.service";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { CreateCampaignDto } from "../dto/create-campagin.dto";
+import { CampaignListDto } from "../dto/campaign-list.dto";
+import { RemoveCampaignDto } from "../dto/remove-campaign.dto";
 
 @Controller("/campaign")
 export class CampaignController {
@@ -20,5 +22,19 @@ export class CampaignController {
     ): Promise<{ message: string; data: any }> {
         let data = await this.campaignService.createNewCampaign(createCampaignDto, images);
         return data;
+    }
+
+    @Post("/list")
+    // @UseGuards(AuthGuard(), RolesGuard)
+    // @Roles(RoleType.ADMIN)
+    async campaignList(@Body() campaignListDTO: CampaignListDto): Promise<{ message: String; data: any }> {
+        let campaignList = await this.campaignService.campaignList(campaignListDTO);
+        return campaignList;
+    }
+
+    @Post("/delete")
+    async RemoveProduct(@Body() removeCampaignDto: RemoveCampaignDto): Promise<{ message: String }> {
+        let res = await this.campaignService.remove(removeCampaignDto);
+        return res;
     }
 }
