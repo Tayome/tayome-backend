@@ -4,6 +4,7 @@ import { FilesInterceptor } from "@nestjs/platform-express";
 import { CreateCampaignDto } from "../dto/create-campagin.dto";
 import { CampaignListDto } from "../dto/campaign-list.dto";
 import { RemoveCampaignDto } from "../dto/remove-campaign.dto";
+import { assignCampaignDto } from "../dto/campaign-assign.dto";
 
 @Controller("/campaign")
 export class CampaignController {
@@ -35,6 +36,12 @@ export class CampaignController {
     @Post("/delete")
     async RemoveProduct(@Body() removeCampaignDto: RemoveCampaignDto): Promise<{ message: String }> {
         let res = await this.campaignService.remove(removeCampaignDto);
+        return res;
+    }
+
+    @Post("/assign")
+    async campaignAssign(@Body() assignCampaignDto: assignCampaignDto): Promise<{ message: String }> {
+        let res = await this.campaignService.assignCampaign(assignCampaignDto);
         return res;
     }
 }

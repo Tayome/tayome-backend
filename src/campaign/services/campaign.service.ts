@@ -5,9 +5,11 @@ import { CreateCampaignDto } from "../dto/create-campagin.dto";
 import { Campaign } from "../schemas/campaign.schema";
 import { Model } from "mongoose";
 import { RemoveCampaignDto } from "../dto/remove-campaign.dto";
+import { CampaignAssign } from "../schemas/campaign-assign.schema";
+import { assignCampaignDto } from "../dto/campaign-assign.dto";
 @Injectable()
 export class CampaignService {
-    constructor(@InjectModel(Campaign.name) private CampaignModel: Model<Campaign>) {}
+    constructor(@InjectModel(Campaign.name) private CampaignModel: Model<Campaign>, @InjectModel(CampaignAssign.name) private CampaignAssignModel: Model<CampaignAssign>) {}
 
     async onModuleInit() {
         await this.CampaignModel.syncIndexes();
@@ -61,6 +63,15 @@ export class CampaignService {
         }
         return {
             message: "Campaign removed",
+        };
+    }
+
+    async assignCampaign(assignCampaignDto: assignCampaignDto): Promise<any> {
+        let addDetails = new this.CampaignAssignModel(assignCampaignDto);
+        let data = await addDetails.save();
+        return {
+            message: "Campaign Assigned",
+            data: data,
         };
     }
 }
