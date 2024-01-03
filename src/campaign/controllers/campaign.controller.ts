@@ -40,8 +40,11 @@ export class CampaignController {
     }
 
     @Post("/assign")
-    async campaignAssign(@Body() assignCampaignDto: assignCampaignDto): Promise<{ message: String }> {
+    async campaignAssign(@Body() assignCampaignDto: assignCampaignDto): Promise<{ message: String; data: any }> {
         let res = await this.campaignService.assignCampaign(assignCampaignDto);
-        return res;
+        return {
+            message: "Campaign successfully assigned",
+            data: res,
+        };
     }
 }

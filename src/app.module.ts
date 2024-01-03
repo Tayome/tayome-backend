@@ -7,8 +7,8 @@ import { UtilsModule } from "./utils/utils.module";
 import { ClinicModule } from "./clinic/clinic.module";
 import { DiseaseModule } from "./disease/disease.module";
 import { CampaignModule } from "./campaign/campaign.module";
-import { CampaignsendService } from "./campaignsend/campaignsend.service";
 import { ScheduleModule } from "@nestjs/schedule";
+import { CampaignSendModule } from "./campaignsend/campaignsend.module";
 
 @Module({
     imports: [
@@ -26,9 +26,10 @@ import { ScheduleModule } from "@nestjs/schedule";
         ClinicModule,
         DiseaseModule,
         CampaignModule,
+        CampaignSendModule,
         ScheduleModule.forRoot(),
     ],
     controllers: [],
-    providers: [CampaignsendService],
+    providers: [],
 })
 export class AppModule {}

@@ -9,24 +9,26 @@ import { PassportModule } from "@nestjs/passport";
 import { GoogleStrategy } from "./strategies/google.strategy";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { FacebookStrategy } from "./strategies/facebook.strategy";
-import { HttpModule } from '@nestjs/axios';
+import { HttpModule } from "@nestjs/axios";
+import { UtilsModule } from "src/utils/utils.module";
 
 @Module({
-  imports: [
-    PassportModule.register({
-      defaultStrategy: "jwt",
-    }),
-    JwtModule.register({
-      global: true,
-      secret: "ASDsad",
-      signOptions: { expiresIn: "7d" },
-    }),
-    MongooseModule.forFeature([{ name: Otp.name, schema: OtpSchema }]),
-    UsersModule,
-    HttpModule,
-  ],
-  providers: [AuthService, GoogleStrategy, FacebookStrategy, JwtStrategy],
-  controllers: [AuthController],
-  exports: [PassportModule, JwtStrategy],
+    imports: [
+        PassportModule.register({
+            defaultStrategy: "jwt",
+        }),
+        JwtModule.register({
+            global: true,
+            secret: "ASDsad",
+            signOptions: { expiresIn: "7d" },
+        }),
+        MongooseModule.forFeature([{ name: Otp.name, schema: OtpSchema }]),
+        UsersModule,
+        HttpModule,
+        UtilsModule,
+    ],
+    providers: [AuthService, GoogleStrategy, FacebookStrategy, JwtStrategy],
+    controllers: [AuthController],
+    exports: [PassportModule, JwtStrategy],
 })
 export class AuthModule {}

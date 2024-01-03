@@ -7,9 +7,22 @@ import { Model } from "mongoose";
 import { RemoveCampaignDto } from "../dto/remove-campaign.dto";
 import { CampaignAssign } from "../schemas/campaign-assign.schema";
 import { assignCampaignDto } from "../dto/campaign-assign.dto";
+import { TransactionService } from "src/utils/services/transaction.service";
+
+import { Patients } from "src/users/schemas/patients.schema";
+import axios from "axios";
+import { HttpService } from "@nestjs/axios";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
 @Injectable()
 export class CampaignService {
-    constructor(@InjectModel(Campaign.name) private CampaignModel: Model<Campaign>, @InjectModel(CampaignAssign.name) private CampaignAssignModel: Model<CampaignAssign>) {}
+    constructor(
+        @InjectModel(Campaign.name) private CampaignModel: Model<Campaign>,
+        @InjectModel(Patients.name) private PatientModel: Model<Patients>,
+        @InjectModel(CampaignAssign.name) private CampaignAssignModel: Model<CampaignAssign>,
+        private readonly transactionService: TransactionService,
+        private readonly httpService: HttpService,
+    ) {}
 
     async onModuleInit() {
         await this.CampaignModel.syncIndexes();
@@ -67,11 +80,43 @@ export class CampaignService {
     }
 
     async assignCampaign(assignCampaignDto: assignCampaignDto): Promise<any> {
-        let addDetails = new this.CampaignAssignModel(assignCampaignDto);
-        let data = await addDetails.save();
-        return {
-            message: "Campaign Assigned",
-            data: data,
-        };
+        const session = await this.transactionService.startTransaction();
+        try {
+            const today = new Date();
+            let addDetails = new this.CampaignAssignModel(assignCampaignDto);
+            let data = await addDetails.save({ session });
+            await this.transactionService.commitTransaction(session);
+            let userData = await this.PatientModel.findById(data.userId);
+            let campaignData = await this.CampaignModel.findById(data.campaignId);
+            const sendCampaignToUser = campaignData.weekData.filter(item => item.weekNumber === "1");
+            let modifyData = campaignData.weekData.map((item, index) => {
+                const sentOnDate = new Date(today);
+                sentOnDate.setDate(today.getDate() + index * 7);
+                if (sendCampaignToUser[0]["_id"] === item["_id"]) {
+                    return {
+                        weekId: item["_id"],
+                        messageSent: true,
+                        sentOn: sentOnDate.toISOString(),
+                        userResponse: "sent",
+                    };
+                }
+                return {
+                    weekId: item["_id"],
+                    messageSent: false,
+                    sentOn: sentOnDate.toISOString(),
+                    userResponse: "",
+                };
+            });
+            let sendCampaignData = {
+                userId: data.userId,
+                mobile: userData.mobile,
+                campaignId: data.campaignId,
+                campaignResponse: modifyData,
+            };
+            return sendCampaignData;
+        } catch (error) {
+            await this.transactionService.abortTransaction(session);
+            throw error;
+        }
     }
 }
