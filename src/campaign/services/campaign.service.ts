@@ -8,12 +8,12 @@ import { RemoveCampaignDto } from "../dto/remove-campaign.dto";
 import { CampaignAssign } from "../schemas/campaign-assign.schema";
 import { assignCampaignDto } from "../dto/campaign-assign.dto";
 import { TransactionService } from "src/utils/services/transaction.service";
-
 import { Patients } from "src/users/schemas/patients.schema";
-import { catchError, firstValueFrom } from "rxjs";
-import { HttpService } from "@nestjs/axios";
-import { AxiosError } from "axios";
+
+import { AxiosResponse } from "axios";
+import { Observable } from "rxjs";
 import { UploadService } from "src/utils/services/upload.service";
+import { HttpService } from "@nestjs/axios";
 
 @Injectable()
 export class CampaignService {
@@ -92,7 +92,9 @@ export class CampaignService {
         const session = await this.transactionService.startTransaction();
         try {
             const today = new Date();
-            let addDetails = new this.CampaignAssignModel(assignCampaignDto);
+            let camp_id = await this.CampaignModel.findOne({ diseaseId: assignCampaignDto.diseaseId }, { _id: 1 });
+            camp_id = camp_id["id"];
+            let addDetails = new this.CampaignAssignModel({ userId: assignCampaignDto.userId, campaignId: camp_id });
             let data = await addDetails.save({ session });
             await this.transactionService.commitTransaction(session);
             let userData = await this.PatientModel.findById(data.userId);

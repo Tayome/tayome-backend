@@ -5,5 +5,5 @@ export class assignCampaignDto {
     userId: string;
 
     @IsMongoId({ message: "Invalid campaign id" })
-    campaignId: string;
+    diseaseId: string;
 }
