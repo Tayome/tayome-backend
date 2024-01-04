@@ -13,6 +13,7 @@ import { Patients } from "src/users/schemas/patients.schema";
 import { catchError, firstValueFrom } from "rxjs";
 import { HttpService } from "@nestjs/axios";
 import { AxiosError } from "axios";
+import { UploadService } from "src/utils/services/upload.service";
 
 @Injectable()
 export class CampaignService {
@@ -22,6 +23,7 @@ export class CampaignService {
         @InjectModel(CampaignAssign.name) private CampaignAssignModel: Model<CampaignAssign>,
         private readonly transactionService: TransactionService,
         private readonly httpService: HttpService,
+        private UploadService: UploadService,
     ) {}
 
     async onModuleInit() {
@@ -29,9 +31,16 @@ export class CampaignService {
     }
 
     async createNewCampaign(createCampaignDto: CreateCampaignDto, images: Array<Express.Multer.File>): Promise<any> {
+        // const imageData = await this.UploadService.upload(image.buffer, "campaign/", image.originalname);
+        const imageData1 = await Promise.all(
+            images.map(async (item, index) => {
+                const im = await this.UploadService.upload(item.buffer, "campaign/", item.originalname);
+                return im;
+            }),
+        );
         const mergedArray = createCampaignDto.weekData.map((item, index) => ({
             ...item,
-            file: images[index]?.originalname || null, // Add the file name or null if not present
+            file: imageData1[index]?.Location || null, // Add the file name or null if not present
         }));
         createCampaignDto.weekData = mergedArray;
         let createCampaignDetails = new this.CampaignModel(createCampaignDto);
