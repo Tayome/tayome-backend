@@ -10,6 +10,9 @@ import { assignCampaignDto } from "../dto/campaign-assign.dto";
 import { TransactionService } from "src/utils/services/transaction.service";
 
 import { Patients } from "src/users/schemas/patients.schema";
+import { catchError, firstValueFrom } from "rxjs";
+import { HttpService } from "@nestjs/axios";
+import { AxiosError } from "axios";
 
 @Injectable()
 export class CampaignService {
@@ -18,6 +21,7 @@ export class CampaignService {
         @InjectModel(Patients.name) private PatientModel: Model<Patients>,
         @InjectModel(CampaignAssign.name) private CampaignAssignModel: Model<CampaignAssign>,
         private readonly transactionService: TransactionService,
+        private readonly httpService: HttpService,
     ) {}
 
     async onModuleInit() {
