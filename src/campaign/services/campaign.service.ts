@@ -51,33 +51,100 @@ export class CampaignService {
         };
     }
 
-    async campaignList(campaignListDTO: CampaignListDto): Promise<any> {
+    async campaignListPipeline(campaignListDTO: CampaignListDto): Promise<Array<any>> {
         const pageSize = campaignListDTO.pageSize ?? 10;
         const page = campaignListDTO.page ?? 1;
         const skip = pageSize * (page - 1);
-
-        const query = {};
-        const sort = {};
-
+        let search: string = "";
         if (campaignListDTO.search) {
-            const searchQueryString = campaignListDTO.search.trim().split(" ").join("|");
-
-            query["$or"] = [{ name: { $regex: `.*${searchQueryString}.*`, $options: "i" } }];
+            search = campaignListDTO.search.trim().split(" ").join("|");
         }
 
-        const totalProm = this.CampaignModel.count(query);
-        const listProm = this.CampaignModel.find()
-            .sort({ ...sort, createdAt: -1 })
-            .limit(pageSize)
-            .skip(skip)
-            .exec();
-        const [total, List] = await Promise.all([totalProm, listProm]);
+        let pipeline = [
+            {
+                $sort: {
+                    createdAt: -1,
+                },
+            },
+            {
+                $match: {
+                    $or: [
+                        {
+                            name: {
+                                $regex: `.*${search}.*`,
+                                $options: "i",
+                            },
+                        },
+                    ],
+                },
+            },
+            {
+                $facet: {
+                    list: [
+                        {
+                            $skip: skip,
+                        },
+                        {
+                            $limit: pageSize,
+                        },
+                        {
+                            $lookup: {
+                                from: "diseasedetails",
+                                localField: "diseaseId",
+                                foreignField: "_id",
+                                as: "diseasedetails",
+                            },
+                        },
+                        {
+                            $unwind: {
+                                path: "$diseasedetails",
+                                preserveNullAndEmptyArrays: true,
+                            },
+                        },
+                        {
+                            $lookup: {
+                                from: "campaignassigns",
+                                localField: "_id",
+                                foreignField: "campaignId",
+                                as: "assignedUsers",
+                            },
+                        },
+                        {
+                            $project: {
+                                campaignName: "$name",
+                                diseaseName: "$diseasedetails.diseaseName",
+                                createdAt: 1,
+                                campaignStatus: {
+                                    $ifNull: ["$status", "ready"],
+                                },
+                                numberOfWeeks: "$weekData.weekNumber",
+                                totalPatients: {
+                                    $size: "$assignedUsers",
+                                },
+                            },
+                        },
+                    ],
+                    total: [
+                        {
+                            $count: "total",
+                        },
+                    ],
+                },
+            },
+        ];
+        return pipeline;
+    }
 
+    async campaignList(campaignListDTO: CampaignListDto): Promise<any> {
+        let pipeline = await this.campaignListPipeline(campaignListDTO);
+        let data = await this.CampaignModel.aggregate(pipeline);
+        // console.log(data);
         return {
-            list: List,
-            total: total,
+            list: data[0]?.list,
+            count: data[0]?.total[0]?.total ? data[0]?.total[0]?.total : 0,
         };
     }
+
     async remove(removeCampaignDto: RemoveCampaignDto): Promise<any> {
         let data = await this.CampaignModel.findByIdAndDelete(removeCampaignDto.id);
         if (!data) {
