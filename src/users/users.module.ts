@@ -6,19 +6,18 @@ import { User, UserSchema } from "./schemas/user.schema";
 import { UtilsModule } from "src/utils/utils.module";
 import { AuthModule } from "src/auth/auth.module";
 import { Patients, PatientsSchema } from "./schemas/patients.schema";
+import { DiseaseDetail, DiseaseDetailSchema } from "src/disease/schemas/disease-detail.schema";
 
 @Module({
     imports: [
-		forwardRef(() => AuthModule),
-		UtilsModule,
-		MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-		MongooseModule.forFeature([{ name: Patients.name, schema: PatientsSchema }])
-	],
+        forwardRef(() => AuthModule),
+        UtilsModule,
+        MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+        MongooseModule.forFeature([{ name: Patients.name, schema: PatientsSchema }]),
+        MongooseModule.forFeature([{ name: DiseaseDetail.name, schema: DiseaseDetailSchema }]),
+    ],
     controllers: [UserController],
     providers: [UserService],
-    exports: [
-		UserService,
-		MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-	],
+    exports: [UserService, MongooseModule.forFeature([{ name: User.name, schema: UserSchema }])],
 })
 export class UsersModule {}
