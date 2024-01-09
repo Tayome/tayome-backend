@@ -14,6 +14,7 @@ import { AxiosResponse } from "axios";
 import { Observable } from "rxjs";
 import { UploadService } from "src/utils/services/upload.service";
 import { HttpService } from "@nestjs/axios";
+import { DiseaseDetail } from "src/disease/schemas/disease-detail.schema";
 
 @Injectable()
 export class CampaignService {
@@ -21,6 +22,7 @@ export class CampaignService {
         @InjectModel(Campaign.name) private CampaignModel: Model<Campaign>,
         @InjectModel(Patients.name) private PatientModel: Model<Patients>,
         @InjectModel(CampaignAssign.name) private CampaignAssignModel: Model<CampaignAssign>,
+        @InjectModel(DiseaseDetail.name) private DiseaseDetailModel: Model<DiseaseDetail>,
         private readonly transactionService: TransactionService,
         private readonly httpService: HttpService,
         private UploadService: UploadService,
@@ -202,5 +204,23 @@ export class CampaignService {
             await this.transactionService.abortTransaction(session);
             throw error;
         }
+    }
+
+    async campaignDetail(removeCampaignDto: RemoveCampaignDto): Promise<any> {
+        // Delete from CampaignModel
+        const data = await this.CampaignModel.findById(removeCampaignDto.id);
+        const disease = await this.DiseaseDetailModel.findById(data.diseaseId);
+        if (!data) {
+            throw new BadRequestException("Unable to remove campaign or related assignments");
+        }
+        const result = {
+            ...data.toObject(), // Convert Mongoose document to plain JavaScript object
+            disease: disease,
+        };
+
+        return {
+            message: "Campaign retrieved successfully",
+            data: result,
+        };
     }
 }

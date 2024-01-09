@@ -7,12 +7,14 @@ import { CampaignAssign, CampaignAssignSchema } from "./schemas/campaign-assign.
 import { UtilsModule } from "src/utils/utils.module";
 import { Patients, PatientsSchema } from "src/users/schemas/patients.schema";
 import { HttpModule } from "@nestjs/axios";
+import { DiseaseDetail, DiseaseDetailSchema } from "src/disease/schemas/disease-detail.schema";
 
 @Module({
     imports: [
         MongooseModule.forFeature([{ name: Campaign.name, schema: CampaignSchema }]),
         MongooseModule.forFeature([{ name: CampaignAssign.name, schema: CampaignAssignSchema }]),
         MongooseModule.forFeature([{ name: Patients.name, schema: PatientsSchema }]),
+        MongooseModule.forFeature([{ name: DiseaseDetail.name, schema: DiseaseDetailSchema }]),
         UtilsModule,
         HttpModule,
     ],

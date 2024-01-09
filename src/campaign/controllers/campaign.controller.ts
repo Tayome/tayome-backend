@@ -47,4 +47,13 @@ export class CampaignController {
             data: res,
         };
     }
+
+    @Post("/detail")
+    async campaigndetail(@Body() removeCampaignDto: RemoveCampaignDto): Promise<{ message: String; data: any }> {
+        let res = await this.campaignService.campaignDetail(removeCampaignDto);
+        return {
+            message: "Campaign retrieved successfully",
+            data: res,
+        };
+    }
 }
