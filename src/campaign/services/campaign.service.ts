@@ -146,13 +146,20 @@ export class CampaignService {
     }
 
     async remove(removeCampaignDto: RemoveCampaignDto): Promise<any> {
-        let data = await this.CampaignModel.findByIdAndDelete(removeCampaignDto.id);
-        if (!data) {
-            throw new BadRequestException("Unable to remove disease");
-        }
-        return {
-            message: "Campaign removed",
-        };
+     // Delete from CampaignModel
+     const data = await this.CampaignModel.findByIdAndDelete(removeCampaignDto.id);
+
+     // Delete from CampaignAssignModel
+     const deleteAssignData = await this.CampaignAssignModel.deleteMany({ campaignId: removeCampaignDto.id });
+ 
+     if (!data || deleteAssignData.deletedCount === 0) {
+         throw new BadRequestException("Unable to remove campaign or related assignments");
+     }
+ 
+     return {
+         message: "Campaign and related assignments removed",
+     };
+ }
     }
 
     async assignCampaign(assignCampaignDto: assignCampaignDto): Promise<any> {
