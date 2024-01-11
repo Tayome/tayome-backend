@@ -15,14 +15,24 @@ import { Observable } from "rxjs";
 import { UploadService } from "src/utils/services/upload.service";
 import { HttpService } from "@nestjs/axios";
 import { DiseaseDetail } from "src/disease/schemas/disease-detail.schema";
-
+import { CampaignSend } from "src/campaignsend/schemas/campaign-send.schema";
+import { firstValueFrom } from "rxjs";
 @Injectable()
 export class CampaignService {
+    private readonly apiHeaders = {
+        "Content-Type": "application/json",
+        apikey: process.env.API_KEY,
+        // Add any other headers you need
+    };
+
+    private readonly apiBaseUrl = "https://api.pinbot.ai/v2/wamessage/sendMessage";
+
     constructor(
         @InjectModel(Campaign.name) private CampaignModel: Model<Campaign>,
         @InjectModel(Patients.name) private PatientModel: Model<Patients>,
         @InjectModel(CampaignAssign.name) private CampaignAssignModel: Model<CampaignAssign>,
         @InjectModel(DiseaseDetail.name) private DiseaseDetailModel: Model<DiseaseDetail>,
+        @InjectModel(CampaignSend.name) private CampaignSendModel: Model<CampaignSend>,
         private readonly transactionService: TransactionService,
         private readonly httpService: HttpService,
         private UploadService: UploadService,
@@ -153,19 +163,20 @@ export class CampaignService {
 
         // Delete from CampaignAssignModel
         const deleteAssignData = await this.CampaignAssignModel.deleteMany({ campaignId: removeCampaignDto.id });
-
-        if (!data || deleteAssignData.deletedCount === 0) {
-            throw new BadRequestException("Unable to remove campaign or related assignments");
-        }
-
         return {
-            message: "Campaign and related assignments removed",
+            message: "Campaign removed successfully",
         };
     }
 
     async assignCampaign(assignCampaignDto: assignCampaignDto): Promise<any> {
         const session = await this.transactionService.startTransaction();
         try {
+            // const headers = {
+            //     "Content-Type": "application/json",
+            //     apikey: process.env.API_KEY,
+            //     // Add any other headers you need
+            // };
+
             const today = new Date();
             let camp_id = await this.CampaignModel.findOne({ diseaseId: assignCampaignDto.diseaseId }, { _id: 1 });
             camp_id = camp_id["id"];
@@ -174,7 +185,50 @@ export class CampaignService {
             await this.transactionService.commitTransaction(session);
             let userData = await this.PatientModel.findById(data.userId);
             let campaignData = await this.CampaignModel.findById(data.campaignId);
+
             const sendCampaignToUser = campaignData.weekData.filter(item => item.weekNumber === "1");
+            const templateData = {
+                from: process.env.ADMIN_WHATS_APP_NUMBER,
+                to: "91" + userData.mobile,
+                type: "template",
+                header: "Welcome to Pinnacle",
+                message: {
+                    templateid: "107995",
+                    placeholders: [],
+                    Footer: "www.pinnacle.in",
+                    buttons: [
+                        {
+                            index: 0,
+                            type: "quick_reply",
+                        },
+                    ],
+                },
+            };
+            const textData = {
+                from: process.env.ADMIN_WHATS_APP_NUMBER,
+                to: "91" + userData.mobile,
+                type: "text",
+                message: {
+                    text: sendCampaignToUser[0].content,
+                },
+            };
+            const imgData = {
+                from: process.env.ADMIN_WHATS_APP_NUMBER,
+                to: "91" + userData.mobile,
+                type: "image",
+                message: {
+                    url: sendCampaignToUser[0].file,
+                    caption: "refer this image",
+                    filename: "sample",
+                },
+            };
+            const headers = this.apiHeaders;
+            const temp_res = await firstValueFrom(this.httpService.post(this.apiBaseUrl, templateData, { headers }));
+            const text_response = await firstValueFrom(this.httpService.post(this.apiBaseUrl, textData, { headers }));
+            const img_response = await firstValueFrom(this.httpService.post(this.apiBaseUrl, imgData, { headers }));
+            console.log("---temp_res--", temp_res);
+            console.log("---text_response--", text_response);
+            console.log("---img_response--", img_response);
             let modifyData = campaignData.weekData.map((item, index) => {
                 const sentOnDate = new Date(today);
                 sentOnDate.setDate(today.getDate() + index * 7);
@@ -195,11 +249,16 @@ export class CampaignService {
             });
             let sendCampaignData = {
                 userId: data.userId,
-                mobile: userData.mobile,
+                mobile: "91" + userData.mobile,
                 campaignId: data.campaignId,
                 campaignResponse: modifyData,
             };
-            return sendCampaignData;
+            let createCampaignsend = new this.CampaignSendModel(sendCampaignData);
+            let res = await createCampaignsend.save();
+            return {
+                message: "Campaign Assigned successfully",
+                data: res,
+            };
         } catch (error) {
             await this.transactionService.abortTransaction(session);
             throw error;
