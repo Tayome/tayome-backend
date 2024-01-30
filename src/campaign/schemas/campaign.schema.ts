@@ -17,11 +17,12 @@ export class Campaign {
                 weekNumber: { type: String, required: true },
                 content: { type: String, required: true },
                 file: { type: String, required: true },
+                templateId: { type: String },
             },
         ],
         required: true,
     })
-    weekData: { weekNumber: String; content: String; file: String }[];
+    weekData: { weekNumber: String; content: String; file: String; templateId: String }[];
 
     @Prop()
     createdAt: Date;

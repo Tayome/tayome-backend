@@ -26,6 +26,7 @@ export class CampaignService {
     };
 
     private readonly apiBaseUrl = "https://api.pinbot.ai/v2/wamessage/sendMessage";
+    private readonly apiCampaignUrl = "https://console.pinbot.ai/api/create-template";
 
     constructor(
         @InjectModel(Campaign.name) private CampaignModel: Model<Campaign>,
@@ -44,17 +45,51 @@ export class CampaignService {
 
     async createNewCampaign(createCampaignDto: CreateCampaignDto, images: Array<Express.Multer.File>): Promise<any> {
         // const imageData = await this.UploadService.upload(image.buffer, "campaign/", image.originalname);
+
         const imageData1 = await Promise.all(
             images.map(async (item, index) => {
-                const im = await this.UploadService.upload(item.buffer, "campaign/", item.originalname);
+                const im = await this.UploadService.upload(item.buffer, "campaign/", item.originalname, item.mimetype);
                 return im;
             }),
         );
+
         const mergedArray = createCampaignDto.weekData.map((item, index) => ({
             ...item,
-            file: imageData1[index]?.Location || null, // Add the file name or null if not present
+            file: imageData1[index]?.Location || null,
         }));
         createCampaignDto.weekData = mergedArray;
+        // return createCampaignDto.name + (Math.floor(Math.random() * 10000) + 10000).toString().substring(1),
+        const ReswithTemplate = await Promise.all(
+            createCampaignDto.weekData.map(async (item, index) => {
+                const templateData = {
+                    name: "campaign" + (Math.floor(Math.random() * 10000) + 10000).toString().substring(1),
+                    language: "en",
+                    category: "MARKETING",
+                    structure: {
+                        header: {
+                            format: "IMAGE",
+                            mediaurl: item["file"],
+                        },
+                        body: item["content"],
+                    },
+                };
+
+                const headers = this.apiHeaders;
+
+                try {
+                    const temp_res = await firstValueFrom(this.httpService.post(this.apiCampaignUrl, templateData, { headers }));
+                    item["templateId"] = temp_res.data.data.templateid;
+                } catch (error) {
+                    console.error("Error fetching template data:", error.message);
+                    // Handle the error as needed
+                    item["templateId"] = null; // Or any default value
+                }
+
+                return item;
+            }),
+        );
+
+        createCampaignDto.weekData = ReswithTemplate;
         let createCampaignDetails = new this.CampaignModel(createCampaignDto);
         let data = await createCampaignDetails.save();
         return {
@@ -191,7 +226,7 @@ export class CampaignService {
                 from: process.env.ADMIN_WHATS_APP_NUMBER,
                 to: "91" + userData.mobile,
                 type: "template",
-                header: "Welcome to Pinnacle",
+                header: "Welcome to Tayome",
                 message: {
                     templateid: "107995",
                     placeholders: [],
@@ -207,28 +242,17 @@ export class CampaignService {
             const textData = {
                 from: process.env.ADMIN_WHATS_APP_NUMBER,
                 to: "91" + userData.mobile,
-                type: "text",
+                type: "template",
+                header: "Welcome to Tayome",
                 message: {
-                    text: sendCampaignToUser[0].content,
-                },
-            };
-            const imgData = {
-                from: process.env.ADMIN_WHATS_APP_NUMBER,
-                to: "91" + userData.mobile,
-                type: "image",
-                message: {
-                    url: sendCampaignToUser[0].file,
-                    caption: "refer this image",
-                    filename: "sample",
+                    templateid: sendCampaignToUser[0]["templateId"],
+                    url: sendCampaignToUser[0]["file"],
                 },
             };
             const headers = this.apiHeaders;
             const temp_res = await firstValueFrom(this.httpService.post(this.apiBaseUrl, templateData, { headers }));
             const text_response = await firstValueFrom(this.httpService.post(this.apiBaseUrl, textData, { headers }));
-            const img_response = await firstValueFrom(this.httpService.post(this.apiBaseUrl, imgData, { headers }));
-            console.log("---temp_res--", temp_res);
-            console.log("---text_response--", text_response);
-            console.log("---img_response--", img_response);
+            // const img_response = await firstValueFrom(this.httpService.post(this.apiBaseUrl, imgData, { headers }));
             let modifyData = campaignData.weekData.map((item, index) => {
                 const sentOnDate = new Date(today);
                 sentOnDate.setDate(today.getDate() + index * 7);
