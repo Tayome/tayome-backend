@@ -6,10 +6,8 @@ import { Campaign } from "../schemas/campaign.schema";
 import { Model } from "mongoose";
 import { RemoveCampaignDto } from "../dto/remove-campaign.dto";
 import { CampaignAssign } from "../schemas/campaign-assign.schema";
-import { assignCampaignDto } from "../dto/campaign-assign.dto";
 import { TransactionService } from "src/utils/services/transaction.service";
 import { Patients } from "src/users/schemas/patients.schema";
-
 import { AxiosResponse } from "axios";
 import { Observable } from "rxjs";
 import { UploadService } from "src/utils/services/upload.service";
@@ -17,6 +15,7 @@ import { HttpService } from "@nestjs/axios";
 import { DiseaseDetail } from "src/disease/schemas/disease-detail.schema";
 import { CampaignSend } from "src/campaignsend/schemas/campaign-send.schema";
 import { firstValueFrom } from "rxjs";
+import { campaignAssignDto } from "../dto/campaign-assign.dto";
 @Injectable()
 export class CampaignService {
     private readonly apiHeaders = {
@@ -203,7 +202,7 @@ export class CampaignService {
         };
     }
 
-    async assignCampaign(assignCampaignDto: assignCampaignDto): Promise<any> {
+    async assignCampaign(assignCampaignDto: campaignAssignDto): Promise<any> {
         const session = await this.transactionService.startTransaction();
         try {
             const today = new Date();

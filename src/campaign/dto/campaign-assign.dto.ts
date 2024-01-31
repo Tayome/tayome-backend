@@ -1,6 +1,6 @@
 import { IsMongoId } from "class-validator";
 
-export class assignCampaignDto {
+export class campaignAssignDto {
     @IsMongoId({ message: "Invalid patient id" })
     userId: string;
 

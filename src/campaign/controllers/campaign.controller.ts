@@ -4,7 +4,7 @@ import { FilesInterceptor } from "@nestjs/platform-express";
 import { CreateCampaignDto } from "../dto/create-campagin.dto";
 import { CampaignListDto } from "../dto/campaign-list.dto";
 import { RemoveCampaignDto } from "../dto/remove-campaign.dto";
-import { assignCampaignDto } from "../dto/campaign-assign.dto";
+import { campaignAssignDto } from "../dto/campaign-assign.dto";
 
 @Controller("/campaign")
 export class CampaignController {
@@ -40,7 +40,7 @@ export class CampaignController {
     }
 
     @Post("/assign")
-    async campaignAssign(@Body() assignCampaignDto: assignCampaignDto): Promise<{ message: String; data: any }> {
+    async campaignAssign(@Body() assignCampaignDto: campaignAssignDto): Promise<{ message: String; data: any }> {
         let res = await this.campaignService.assignCampaign(assignCampaignDto);
         return {
             message: "Campaign successfully assigned",
