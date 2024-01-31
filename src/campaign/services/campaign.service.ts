@@ -206,12 +206,6 @@ export class CampaignService {
     async assignCampaign(assignCampaignDto: assignCampaignDto): Promise<any> {
         const session = await this.transactionService.startTransaction();
         try {
-            // const headers = {
-            //     "Content-Type": "application/json",
-            //     apikey: process.env.API_KEY,
-            //     // Add any other headers you need
-            // };
-
             const today = new Date();
             let camp_id = await this.CampaignModel.findOne({ diseaseId: assignCampaignDto.diseaseId }, { _id: 1 });
             camp_id = camp_id["id"];
