@@ -33,6 +33,12 @@ export class User {
 
   @Prop({ type: String })
   picture: String;
+  
+  @Prop({ type: String })
+  gender: string;
+
+  @Prop({ type: Boolean, default: false })
+  assigned: boolean;
 
   @Prop({ required: true, default: "user", enum: RoleType })
   role: String;

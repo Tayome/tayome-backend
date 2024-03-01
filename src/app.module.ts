@@ -9,6 +9,9 @@ import { DiseaseModule } from "./disease/disease.module";
 import { CampaignModule } from "./campaign/campaign.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { CampaignSendModule } from "./campaignsend/campaignsend.module";
+import { CounsellorModule } from "./counsellor/counsellor.module";
+import { FollowUpModule } from "./followUp/follow-up.module";
+import { JourneyModule } from "./journey/journey.module";
 
 @Module({
     imports: [
@@ -27,6 +30,9 @@ import { CampaignSendModule } from "./campaignsend/campaignsend.module";
         DiseaseModule,
         CampaignModule,
         CampaignSendModule,
+        CounsellorModule,
+        FollowUpModule,
+        JourneyModule,
         ScheduleModule.forRoot(),
     ],
     controllers: [],

@@ -32,6 +32,9 @@ export class Patients {
 
     @Prop({ type: String })
     notes: String;
+    
+    @Prop({ type: SchemaTypes.ObjectId, ref: "User"})
+    counsellorId: string;
 }
 
 export const PatientsSchema = SchemaFactory.createForClass(Patients);

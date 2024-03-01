@@ -23,6 +23,10 @@ export class RegisterUserDto {
   @Length(10)
   mobile: string;
 
+  @IsOptional()
+  @IsString()
+  gender: string;
+
   @IsStrongPassword()
   password: string;
 
