@@ -25,6 +25,9 @@ export class OnboardingUserDto {
     @Length(2, 100)
     medicalCondition: String;
 
+    @Length(2, 100)
+    medicineName: String;
+
     @IsOptional()
     @Length(2, 600)
     notes: String;

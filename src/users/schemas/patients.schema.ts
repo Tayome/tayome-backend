@@ -6,7 +6,7 @@ export type PatientsDocument = HydratedDocument<Patients>;
 
 @Schema({ timestamps: true })
 export class Patients {
-    @Prop({ required: true, type: SchemaTypes.ObjectId, ref: "ClinicsDetail"})
+    @Prop({ required: true, type: SchemaTypes.ObjectId, ref: "ClinicsDetail" })
     clinicId: String;
 
     @Prop({ required: true, type: String })
@@ -27,8 +27,14 @@ export class Patients {
     @Prop({ required: true, type: String })
     medicalCondition: String;
 
+    @Prop({ required: true, type: String })
+    medicineName: String;
+
     @Prop({ type: String })
     notes: String;
+    
+    @Prop({ type: SchemaTypes.ObjectId, ref: "User"})
+    counsellorId: string;
 }
 
 export const PatientsSchema = SchemaFactory.createForClass(Patients);
