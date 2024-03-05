@@ -21,4 +21,8 @@ export class CreateFollowUpDTO {
   @IsEnum(FollowUpStatus)
   status: string;
 
+  @IsOptional()
+  @IsMongoId({ message: "Prescription id must be mongodb id"})
+  prescriptionId: string;
+
 }

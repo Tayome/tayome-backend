@@ -43,6 +43,9 @@ export class User {
   @Prop({ required: true, default: "user", enum: RoleType })
   role: String;
 
+  @Prop({ type: Boolean, default: true})
+  status: boolean;
+
   @Prop()
   salt: String;
 

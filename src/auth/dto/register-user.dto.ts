@@ -1,6 +1,7 @@
 import { MaxLength, IsEnum, IsEmail, Length, ValidateIf, IsStrongPassword, IsMongoId, IsString, IsOptional } from "class-validator";
 import { AuthTypes } from "../enums/auth.enum";
 import { Transform } from "class-transformer";
+import { RoleType } from "../enums/role.enum";
 
 export class RegisterUserDto {
   @IsEnum([AuthTypes.EMAIL, AuthTypes.MOBILE])
@@ -30,6 +31,11 @@ export class RegisterUserDto {
   @IsStrongPassword()
   password: string;
 
+  @IsOptional()
+  @IsString({ message: "Invalid value for role" })
+  role: string;
+
+  @ValidateIf(req => req.role !== RoleType.COUNSELLOR)
   @IsMongoId()
   otpVerificationCode: string;
 }

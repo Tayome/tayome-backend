@@ -12,6 +12,7 @@ import { CampaignSendModule } from "./campaignsend/campaignsend.module";
 import { CounsellorModule } from "./counsellor/counsellor.module";
 import { FollowUpModule } from "./followUp/follow-up.module";
 import { JourneyModule } from "./journey/journey.module";
+import { PrescriptionModule } from "./prescription/prescription.module";
 
 @Module({
     imports: [
@@ -33,6 +34,7 @@ import { JourneyModule } from "./journey/journey.module";
         CounsellorModule,
         FollowUpModule,
         JourneyModule,
+        PrescriptionModule,
         ScheduleModule.forRoot(),
     ],
     controllers: [],

@@ -26,6 +26,9 @@ export class FollowUp {
     @Prop({ type: String, default: FollowUpStatus.UPCOMING })
     status: FollowUpStatus
 
+    @Prop({ type: SchemaTypes.ObjectId, ref: "Prescription"})
+    prescriptionId: string;
+
     @Prop()
     createdAt: Date;
   

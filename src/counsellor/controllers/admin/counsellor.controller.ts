@@ -5,6 +5,7 @@ import { CounsellorService } from "../../services/admin/counsellor.service";
 import { GetCounsellorDto } from "../../dto/get-counsellor.dto";
 import { UpdateCounsellorDto } from "../../dto/update-counsellor.dto";
 import { RegisterUserDto } from "src/auth/dto/register-user.dto";
+import { AssignCounsellorDto } from "src/counsellor/dto/assign-counsellor.dto";
 
 @Controller("/admin/counsellor")
 export class CounsellorController {
@@ -52,11 +53,11 @@ export class CounsellorController {
         }
     }
 
-    @Get("/assign-counsellor/:id")
-    async assignCounsellor(@Param("id") id :string): Promise<APIResponse> {
+    @Post("/assign-counsellor/:id")
+    async assignCounsellor(@Param("id") id :string, AssignCounsellorDto: AssignCounsellorDto): Promise<APIResponse> {
         return {
             message: "Counsellor assign successfully",
-            data: await this.CounsellorService.assignCounsellor(id)
+            data: await this.CounsellorService.assignCounsellor(id, AssignCounsellorDto)
         }
     }
 }
