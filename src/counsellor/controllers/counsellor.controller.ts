@@ -24,4 +24,12 @@ export class CounsellorController {
             data: await this.counsellorService.getPatientDetails(id)
         }
     }
+
+    @Get("/campaign-list/:id")
+    async getCampaignList(@Param("id") id: string): Promise<APIResponse> {
+        return {
+            message: "Patient campaign list fetch successfully",
+            data: await this.counsellorService.getCampaignList(id)
+        }
+    }
 }

@@ -9,6 +9,7 @@ import { MailModule } from "src/mail/mail.module";
 import { CounsellorController } from "./controllers/counsellor.controller";
 import { CounsellorService } from "./services/counsellor.service";
 import { DiseaseDetail, DiseaseDetailSchema } from "src/disease/schemas/disease-detail.schema";
+import { CampaignAssign, CampaignAssignSchema } from "src/campaign/schemas/campaign-assign.schema";
 
 @Module({
     imports:[
@@ -16,7 +17,8 @@ import { DiseaseDetail, DiseaseDetailSchema } from "src/disease/schemas/disease-
             MongooseModule.forFeature([{ name: Counsellor.name, schema: CounsellorSchema}]),
             MongooseModule.forFeature([{ name: User.name, schema: UserSchema}]),
             MongooseModule.forFeature([{ name: Patients.name, schema: PatientsSchema}]),
-            MongooseModule.forFeature([{ name: DiseaseDetail.name, schema: DiseaseDetailSchema}]),],
+            MongooseModule.forFeature([{ name: DiseaseDetail.name, schema: DiseaseDetailSchema}]),
+            MongooseModule.forFeature([{ name: CampaignAssign.name, schema: CampaignAssignSchema}]),],
             
     controllers:[AdminCounsellorController, CounsellorController],
     providers:[AdminCounsellorService, CounsellorService],
