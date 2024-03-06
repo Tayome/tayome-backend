@@ -54,7 +54,10 @@ export class UserService {
     }
 
     async patienDetails(patienDetailDto: PatienDetailDto): Promise<any> {
-        const user = await this.PatientModel.findById(patienDetailDto.id).populate("clinicId").exec();
+        const user = await this.PatientModel.findById(patienDetailDto.id)
+        .populate("clinicId")
+        .populate("counsellorId", "firstName lastName email gender")
+        .exec();
         const disease = await this.DiseaseDetailModel.findById(user.medicalCondition);
         const result = {
             ...user.toObject(), // Convert Mongoose document to plain JavaScript object

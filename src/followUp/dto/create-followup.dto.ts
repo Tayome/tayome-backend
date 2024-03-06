@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsDate, IsEnum, IsMongoId, IsOptional, IsString} from "class-validator";
+import { IsDate, IsEnum, IsMongoId, IsOptional, IsString, Matches} from "class-validator";
 import { FollowUpStatus } from "../schemas/follow-up.schema";
 
 export class CreateFollowUpDTO {
@@ -13,6 +13,10 @@ export class CreateFollowUpDTO {
   @IsDate({ message: 'Invalid follow up date format' })
   @Transform(({ value }) => new Date(value))
   followUpDate: Date;
+
+  @IsString()
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/, { message: 'Time should be in HH:mm format' })
+  followUpTime: string;
 
   @IsString()
   note: string;

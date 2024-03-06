@@ -8,13 +8,16 @@ import { Patients, PatientsSchema } from "src/users/schemas/patients.schema";
 import { MailModule } from "src/mail/mail.module";
 import { CounsellorController } from "./controllers/counsellor.controller";
 import { CounsellorService } from "./services/counsellor.service";
+import { DiseaseDetail, DiseaseDetailSchema } from "src/disease/schemas/disease-detail.schema";
 
 @Module({
     imports:[
             MailModule,
             MongooseModule.forFeature([{ name: Counsellor.name, schema: CounsellorSchema}]),
             MongooseModule.forFeature([{ name: User.name, schema: UserSchema}]),
-            MongooseModule.forFeature([{ name: Patients.name, schema: PatientsSchema}])],
+            MongooseModule.forFeature([{ name: Patients.name, schema: PatientsSchema}]),
+            MongooseModule.forFeature([{ name: DiseaseDetail.name, schema: DiseaseDetailSchema}]),],
+            
     controllers:[AdminCounsellorController, CounsellorController],
     providers:[AdminCounsellorService, CounsellorService],
     exports:[]
