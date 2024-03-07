@@ -3,11 +3,15 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { Patients } from "src/users/schemas/patients.schema";
 import { GetPatientListDto } from "../dto/patient-list.dto";
+import { DiseaseDetail } from "src/disease/schemas/disease-detail.schema";
+import { CampaignAssign } from "src/campaign/schemas/campaign-assign.schema";
 
 @Injectable()
 export class CounsellorService {
     constructor(
-        @InjectModel(Patients.name) private patientModel: Model<Patients>
+        @InjectModel(Patients.name) private patientModel: Model<Patients>,
+        @InjectModel(DiseaseDetail.name) private DiseaseDetailModel: Model<DiseaseDetail>,
+        @InjectModel(CampaignAssign.name) private CampaignAssignModel: Model<CampaignAssign>,
     ) {}
 
     async getPatientList(id: string, GetPatientListDto: GetPatientListDto) :Promise<any> {
@@ -34,6 +38,44 @@ export class CounsellorService {
     }
 
     async getPatientDetails(id: string): Promise<any> {
-        return await this.patientModel.findById(id).populate("clinicId").populate("medicalCondition").exec();
+        const user = await this.patientModel.findById(id)
+        .populate("clinicId")
+        .populate("medicalCondition")
+        .populate("counsellorId", "firstName lastName email gender")
+        .exec();
+        const disease = await this.DiseaseDetailModel.findById(user.medicalCondition);
+        const result = {
+            ...user.toObject(), // Convert Mongoose document to plain JavaScript object
+            medicalCondition: disease,
+        };
+
+        return result;
+    }
+
+    async getCampaignList(id: string): Promise<any> {
+        const userId = Types.ObjectId.createFromHexString(id)
+        const result = await this.CampaignAssignModel.aggregate([
+            {
+                $match: {userId: userId}
+            },
+            {
+                $lookup: {
+                    from: "campaigns",
+                    localField: "campaignId",
+                    foreignField: "_id",
+                    as: "campaignList"
+                }
+            },
+            {
+                $unwind: "$campaignList"
+            },
+            {
+                $project: {
+                    _id: "$campaignList._id",
+                    name:"$campaignList.name"
+                }
+            }
+        ])
+        return result;
     }
 }

@@ -20,6 +20,9 @@ export class FollowUp {
     @Prop({ type: Date })
     followUpDate: Date;
 
+    @Prop({ type: String, match: /^([01]\d|2[0-3]):[0-5]\d$/ })
+    followUpTime: string;
+
     @Prop({ type: String })
     note: string;
 

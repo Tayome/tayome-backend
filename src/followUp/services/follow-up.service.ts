@@ -41,7 +41,6 @@ export class FollowUpService {
         }else if (FilterFollowUpDTO?.endDate) {
           query["followUpDate"] = { $lte: FilterFollowUpDTO?.endDate };
         }
-        console.log("query', ", query)
         return await this.followupModel.find(query)
         .populate("patientId", "name language mobile medicineName")
         .populate("counsellorId", "firstName lastName email mobile gender role")
