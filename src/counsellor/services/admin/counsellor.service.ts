@@ -12,6 +12,7 @@ import { Patients } from "src/users/schemas/patients.schema";
 import { AuthTypes } from "src/auth/enums/auth.enum";
 import { MailService } from "src/mail/services/mail.service";
 import { AssignCounsellorDto } from "src/counsellor/dto/assign-counsellor.dto";
+import { Journey, JourneyType } from "src/journey/schemas/journey.schema";
 
 @Injectable()
 export class CounsellorService {
@@ -19,6 +20,7 @@ export class CounsellorService {
         @InjectModel(Counsellor.name) private counsellorModel: Model<Counsellor>,
         @InjectModel(User.name) private UserModel: Model<User>,
         @InjectModel(Patients.name) private patientModel: Model<Patients>,
+        @InjectModel(Journey.name) private journeyModel: Model<Journey>,
         private mailService: MailService,
     ) {}
 
@@ -157,7 +159,7 @@ export class CounsellorService {
     }
 
     async assignCounsellor(id, AssignCounsellorDto: AssignCounsellorDto): Promise<any> {
-        let query = {};
+        let query:any = {};
         if (AssignCounsellorDto?.counsellorId) {
             let counsellorQuery = {_id: Types.ObjectId.createFromHexString(AssignCounsellorDto.counsellorId)}
             counsellorQuery["status"] = true;
@@ -172,6 +174,13 @@ export class CounsellorService {
                 query["counsellorId"] = nextCounsellor._id;
             }
         }
+        const journey = {
+            patientId: id,
+            counsellorId: query?.counsellorId,
+            journeyType: JourneyType.ASSIGNCOUNSELLOR
+        };
+        const saveJourney = new this.journeyModel(journey);
+        await saveJourney.save();
         return await this.patientModel.findByIdAndUpdate(id, query, {new : true});;
     }
 

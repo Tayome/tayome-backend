@@ -3,6 +3,12 @@ import { HydratedDocument, SchemaTypes } from "mongoose";
 
 export type JourneyDocument = HydratedDocument<Journey>
 
+export enum JourneyType  {
+    FOLLOWUPADDED = "FollowUpAdded",
+    ASSIGNCOUNSELLOR = "AssignCounsellor",
+    ASSIGNCAMPAIGN = "AssignCampaign"
+}
+
 @Schema({ timestamps: true })
 export class Journey {
     _id: string;
@@ -10,8 +16,14 @@ export class Journey {
     @Prop({ type: SchemaTypes.ObjectId, required: true, ref: "Patients"})
     patientId: string;
   
-    @Prop({ type: SchemaTypes.ObjectId, required: true, ref: "User"})
+    @Prop({ type: SchemaTypes.ObjectId, ref: "User"})
     counsellorId: string;
+
+    @Prop({ enum: JourneyType, required: true })
+    journeyType: string;
+
+    @Prop({ type: SchemaTypes.ObjectId, ref: "Campaign"})
+    campaignId: string;
   
     @Prop({ type: SchemaTypes.ObjectId, ref: "FollowUp"})
     followUpId: string;

@@ -3,7 +3,7 @@ import { CreateFollowUpDTO } from "../dto/create-followup.dto";
 import { InjectModel } from "@nestjs/mongoose";
 import { FollowUp } from "../schemas/follow-up.schema";
 import { Model } from "mongoose";
-import { Journey } from "src/journey/schemas/journey.schema";
+import { Journey, JourneyType } from "src/journey/schemas/journey.schema";
 import { FilterFollowUpDTO } from "../dto/filter-followup.dto";
 
 @Injectable()
@@ -20,6 +20,7 @@ export class FollowUpService {
                 patientId: CreateFollowUpDTO?.patientId,
                 counsellorId: CreateFollowUpDTO?.counsellorId,
                 followUpId: saveFollowUp?._id,
+                journeyType: JourneyType.FOLLOWUPADDED
             };
             const saveJourney = new this.journeyModel(journey);
             await saveJourney.save();
