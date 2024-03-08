@@ -27,8 +27,9 @@ export class JourneyService {
         }
     
         return await this.journeyModel.find(query)
-        .populate("patientId", "firstName lastName email picture")
-        .populate("counsellorId", "name email mobile storeLocation")
+        .populate("patientId", "name city mobile")
+        .populate("counsellorId", "firstName lastName mobile email gender")
         .populate("followUpId", "followUpDate note")
+        .populate("campaignId", "name weekData")
     }
 }

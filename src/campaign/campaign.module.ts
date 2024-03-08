@@ -9,6 +9,7 @@ import { Patients, PatientsSchema } from "src/users/schemas/patients.schema";
 import { HttpModule, HttpService } from "@nestjs/axios";
 import { DiseaseDetail, DiseaseDetailSchema } from "src/disease/schemas/disease-detail.schema";
 import { CampaignSend, CampaignSendSchema } from "src/campaignsend/schemas/campaign-send.schema";
+import { Journey, JourneySchema } from "src/journey/schemas/journey.schema";
 
 @Module({
     imports: [
@@ -17,6 +18,7 @@ import { CampaignSend, CampaignSendSchema } from "src/campaignsend/schemas/campa
         MongooseModule.forFeature([{ name: Patients.name, schema: PatientsSchema }]),
         MongooseModule.forFeature([{ name: DiseaseDetail.name, schema: DiseaseDetailSchema }]),
         MongooseModule.forFeature([{ name: CampaignSend.name, schema: CampaignSendSchema }]),
+        MongooseModule.forFeature([{ name: Journey.name, schema: JourneySchema}]),
         UtilsModule,
         HttpModule,
     ],

@@ -16,6 +16,7 @@ import { DiseaseDetail } from "src/disease/schemas/disease-detail.schema";
 import { CampaignSend } from "src/campaignsend/schemas/campaign-send.schema";
 import { firstValueFrom } from "rxjs";
 import { campaignAssignDto } from "../dto/campaign-assign.dto";
+import { Journey, JourneyType } from "src/journey/schemas/journey.schema";
 @Injectable()
 export class CampaignService {
     private readonly apiHeaders = {
@@ -33,6 +34,7 @@ export class CampaignService {
         @InjectModel(CampaignAssign.name) private CampaignAssignModel: Model<CampaignAssign>,
         @InjectModel(DiseaseDetail.name) private DiseaseDetailModel: Model<DiseaseDetail>,
         @InjectModel(CampaignSend.name) private CampaignSendModel: Model<CampaignSend>,
+        @InjectModel(Journey.name) private JourneyModel: Model<Journey>,
         private readonly transactionService: TransactionService,
         private readonly httpService: HttpService,
         private UploadService: UploadService,
@@ -210,6 +212,15 @@ export class CampaignService {
             camp_id = camp_id["id"];
             let addDetails = new this.CampaignAssignModel({ userId: assignCampaignDto.userId, campaignId: camp_id });
             let data = await addDetails.save({ session });
+            if (data) {
+                const journey = {
+                    patientId: data.userId,
+                    campaignId: camp_id,
+                    journeyType: JourneyType.ASSIGNCAMPAIGN
+                };
+                const saveJourney = new this.JourneyModel(journey);
+                await saveJourney.save({ session });
+            }
             await this.transactionService.commitTransaction(session);
             let userData = await this.PatientModel.findById(data.userId);
             let campaignData = await this.CampaignModel.findById(data.campaignId);
