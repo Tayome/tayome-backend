@@ -15,16 +15,17 @@ export class PrescriptionService {
     async createPrescription(CreatePrescriptionDto: CreatePrescriptionDto, image: Express.Multer.File): Promise<any> {
         let imageData;
         let payload : any = CreatePrescriptionDto;
+        let success;
         if (image) {
             imageData = await this.uploadService.upload(image?.buffer, `prescription/`, image?.originalname);
             if (imageData) {
                 payload.prescriptionUrl = imageData?.Location
+                success = await this.prescriptionModel.create(payload);
             } else {
-                // throw new BadRequestException("Error While uploading prescription")
-                payload.prescriptionUrl = "https://s3.ap-south-1.amazonaws.com/micra.sejal/campaign/9042ecc3-64b4-4eed-a585-97ef976fcc24-istockphoto-873891794-2048x2048.jpg"
+                throw new BadRequestException("Error While uploading prescription");
             }
         }
-        return await this.prescriptionModel.create(payload);
+        return success;
     }
 
     async getPrescriptionList(id: string): Promise <any> {
