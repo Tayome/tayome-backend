@@ -105,6 +105,11 @@ export class CounsellorService {
                     patientCount: { $size: "$patient" }, // Count the number of patients for each user
                 },
             },
+            {
+                $sort: {
+                    createdAt: -1, // Sort in descending order (latest first)
+                },
+            },
         ])
             .skip(skip)
             .limit(pageSize)
