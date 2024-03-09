@@ -45,7 +45,15 @@ export class UserService {
         const skip = pageSize * (page - 1);
         let sort = {};
 
-        return await this.PatientModel.find()
+        let query = this.PatientModel.find();
+
+        // Check if name is provided in patientsListDto
+        if (patientsListDto.name) {
+            // Add name search to the query
+            query = query.find({ name: { $regex: patientsListDto.name, $options: "i" } });
+        }
+
+        return await query
             .sort({ ...sort, createdAt: -1 })
             .limit(pageSize)
             .skip(skip)
@@ -54,10 +62,7 @@ export class UserService {
     }
 
     async patienDetails(patienDetailDto: PatienDetailDto): Promise<any> {
-        const user = await this.PatientModel.findById(patienDetailDto.id)
-        .populate("clinicId")
-        .populate("counsellorId", "firstName lastName email gender")
-        .exec();
+        const user = await this.PatientModel.findById(patienDetailDto.id).populate("clinicId").populate("counsellorId", "firstName lastName email gender").exec();
         const disease = await this.DiseaseDetailModel.findById(user.medicalCondition);
         const result = {
             ...user.toObject(), // Convert Mongoose document to plain JavaScript object
