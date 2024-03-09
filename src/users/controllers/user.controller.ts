@@ -7,6 +7,7 @@ import { UserService } from "../services/user.service";
 import { OnboardingUserDto } from "../dto/onboarding-user.dto";
 import { PatientsListDto } from "../dto/patients-list.dto";
 import { PatienDetailDto } from "../dto/patient-detail.dto";
+import { GetUser } from "src/auth/decorators/get-user.decorator";
 
 @Controller("user")
 export class UserController {
@@ -22,8 +23,9 @@ export class UserController {
     }
 
     @Post("/patients/list")
-    async patientsList(@Body() patientsListDto: PatientsListDto): Promise<{ message: String; data: any }> {
-        const list = await this.userService.patientsList(patientsListDto);
+    @UseGuards(AuthGuard())
+    async patientsList(@GetUser() user, @Body() patientsListDto: PatientsListDto): Promise<{ message: String; data: any }> {
+        const list = await this.userService.patientsList(patientsListDto, user);
         return {
             message: "Patients List",
             data: list,

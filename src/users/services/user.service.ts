@@ -39,15 +39,17 @@ export class UserService {
         return await patientData.save();
     }
 
-    async patientsList(patientsListDto: PatientsListDto): Promise<any> {
+    async patientsList(patientsListDto: PatientsListDto, user): Promise<any> {
         const pageSize = patientsListDto.pageSize ?? 10;
         const page = patientsListDto.page ?? 1;
         const skip = pageSize * (page - 1);
         let sort = {};
-
-        let query = this.PatientModel.find();
-
-        // Check if name is provided in patientsListDto
+        let query;
+        if (user.role == "admin") {
+            query = this.PatientModel.find();
+        } else {
+            query = this.PatientModel.find({ counsellorId: user.id });
+        }
         if (patientsListDto.name) {
             // Add name search to the query
             query = query.find({ name: { $regex: patientsListDto.name, $options: "i" } });
