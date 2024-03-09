@@ -119,7 +119,7 @@ export class CounsellorService {
             {
                 $match: {
                     _id: Types.ObjectId.createFromHexString(id),
-                    status: true
+                    status: true,
                 },
             },
             {
@@ -158,30 +158,32 @@ export class CounsellorService {
         return await this.counsellorModel.findByIdAndDelete(id);
     }
 
-    async assignCounsellor(id, AssignCounsellorDto: AssignCounsellorDto): Promise<any> {
-        let query:any = {};
-        if (AssignCounsellorDto?.counsellorId) {
-            let counsellorQuery = {_id: Types.ObjectId.createFromHexString(AssignCounsellorDto.counsellorId)}
+    async assignCounsellor(id, assignCounsellorDto: AssignCounsellorDto): Promise<any> {
+        let query: any = {};
+
+        if (assignCounsellorDto?.counsellorId) {
+            let counsellorQuery = { _id: Types.ObjectId.createFromHexString(assignCounsellorDto.counsellorId) };
             counsellorQuery["status"] = true;
-            const existCounsellor = await this.UserModel.findOne(counsellorQuery)
+            const existCounsellor = await this.UserModel.findOne(counsellorQuery);
             if (!existCounsellor) {
                 throw new BadRequestException("Counsellor is not active");
             }
-            query["counsellorId"] = AssignCounsellorDto.counsellorId;
+            query["counsellorId"] = assignCounsellorDto.counsellorId;
         } else {
             const nextCounsellor = await this.getNextCounsellor();
             if (nextCounsellor) {
                 query["counsellorId"] = nextCounsellor._id;
             }
         }
+
         const journey = {
             patientId: id,
             counsellorId: query?.counsellorId,
-            journeyType: JourneyType.ASSIGNCOUNSELLOR
+            journeyType: JourneyType.ASSIGNCOUNSELLOR,
         };
         const saveJourney = new this.journeyModel(journey);
         await saveJourney.save();
-        return await this.patientModel.findByIdAndUpdate(id, query, {new : true});;
+        return await this.patientModel.findByIdAndUpdate(id, query, { new: true });
     }
 
     private async hashPassword(password: string, salt: string): Promise<String> {
