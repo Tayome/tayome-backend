@@ -208,8 +208,13 @@ export class CampaignService {
         const session = await this.transactionService.startTransaction();
         try {
             const today = new Date();
-            let camp_id = await this.CampaignModel.findOne({ diseaseId: assignCampaignDto.diseaseId }, { _id: 1 });
-            camp_id = camp_id["id"];
+            let camp_id;
+            if (assignCampaignDto?.campaignId) {
+                camp_id = assignCampaignDto.campaignId;
+            } else {
+                camp_id = await this.CampaignModel.findOne({ diseaseId: assignCampaignDto.diseaseId }, { _id: 1 });
+                camp_id = camp_id["id"];
+            }
             let addDetails = new this.CampaignAssignModel({ userId: assignCampaignDto.userId, campaignId: camp_id });
             let data = await addDetails.save({ session });
             if (data) {
