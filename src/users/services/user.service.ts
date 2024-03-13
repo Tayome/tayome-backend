@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { User } from "../schemas/user.schema";
-import { Connection, Model } from "mongoose";
+import { Connection, Model, Types } from "mongoose";
 import { InjectConnection, InjectModel } from "@nestjs/mongoose";
 import { UploadService } from "src/utils/services/upload.service";
 import { OnboardingUserDto } from "../dto/onboarding-user.dto";
@@ -55,21 +55,29 @@ export class UserService {
             query = query.find({ name: { $regex: patientsListDto.name, $options: "i" } });
         }
 
-        return await query
+        const patient = await query
             .sort({ ...sort, createdAt: -1 })
             .limit(pageSize)
             .skip(skip)
             .populate("clinicId")
+            .populate("counsellorId", "-password -salt")
+            .populate("medicalCondition")
             .exec();
+
+        return patient;
     }
 
     async patienDetails(patienDetailDto: PatienDetailDto): Promise<any> {
-        const user = await this.PatientModel.findById(patienDetailDto.id).populate("clinicId").populate("counsellorId", "firstName lastName email gender").exec();
-        const disease = await this.DiseaseDetailModel.findById(user.medicalCondition);
-        const result = {
-            ...user.toObject(), // Convert Mongoose document to plain JavaScript object
-            disease: disease,
-        };
-        return result;
+        const user = await this.PatientModel.findById(patienDetailDto.id)
+            .populate("clinicId")
+            .populate("counsellorId", "firstName lastName email gender")
+            .populate("medicalCondition")
+            .exec();
+        // const disease = await this.DiseaseDetailModel.findById(user.medicalCondition);
+        // const result = {
+        //     ...user.toObject(), // Convert Mongoose document to plain JavaScript object
+        //     disease: disease,
+        // };
+        return user;
     }
 }

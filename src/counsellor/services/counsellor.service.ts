@@ -34,17 +34,6 @@ export class CounsellorService {
     }
 
     async getPatientDetails(id: string): Promise<any> {
-        // const user = await this.patientModel.findById(id)
-        // .populate("clinicId")
-        // .populate("medicalCondition")
-        // .populate("counsellorId", "firstName lastName email gender")
-        // .exec();
-        // const disease = await this.DiseaseDetailModel.findById(user.medicalCondition);
-        // const result = {
-        //     ...user.toObject(), // Convert Mongoose document to plain JavaScript object
-        //     medicalCondition: disease,
-        // };
-
         const user: any = await this.patientModel.aggregate([
             {
                 $match: { _id: Types.ObjectId.createFromHexString(id) },
@@ -55,6 +44,14 @@ export class CounsellorService {
                     localField: "clinicId",
                     foreignField: "_id",
                     as: "clinicId",
+                },
+            },
+            {
+                $lookup: {
+                    from: "diseasedetails",
+                    localField: "medicalCondition",
+                    foreignField: "_id",
+                    as: "medicalCondition",
                 },
             },
             {
@@ -111,20 +108,73 @@ export class CounsellorService {
                 },
             },
             {
+                $lookup: {
+                    from: "followups",
+                    localField: "_id",
+                    foreignField: "patientId",
+                    as: "followUp",
+                },
+            },
+            {
+                $addFields: {
+                    lastFollowUp: {
+                        $filter: {
+                            input: "$followUp",
+                            as: "follow",
+                            cond: { $lt: ["$$follow.followUpDate", new Date()] }, 
+                        },
+                    },
+                },
+            },
+            {
+                $unwind: "$lastFollowUp",
+            },
+            {
+                $sort: { "lastFollowUp.followUpDate": -1 }, 
+            },
+            {
+                $limit: 1, 
+            },
+            {
+                $addFields: {
+                    upComingFollowup: {
+                        $filter: {
+                            input: "$followUp",
+                            as: "follow",
+                            cond: { $gt: ["$$follow.followUpDate", new Date()] }, 
+                        },
+                    },
+                },
+            },
+            {
+                $unwind: "$upComingFollowup",
+            },
+            {
+                $sort: { "upComingFollowup.followUpDate": -1 }, 
+            },
+            {
+                $limit: 1, 
+            },
+            {
                 $unwind: "$clinicId",
             },
             {
                 $unwind: "$counsellorId",
             },
+            {
+                $project: {
+                    followUp: 0
+                }
+            }
         ]);
 
-        const disease = await this.DiseaseDetailModel.findById(user.medicalCondition);
-        const result = {
-            ...user[0], // Convert Mongoose document to plain JavaScript object
-            medicalCondition: disease,
-        };
+        // const disease = await this.DiseaseDetailModel.findById(user.medicalCondition);
+        // const result = {
+        //     ...user[0], // Convert Mongoose document to plain JavaScript object
+        //     medicalCondition: disease,
+        // };
 
-        return result;
+        return user;
     }
 
     async getCampaignList(id: string): Promise<any> {

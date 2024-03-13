@@ -1,11 +1,11 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
-import { CreateCounsellorDto } from "../../dto/create-counsellor.dto";
 import { APIResponse } from "src/utils/types/api-response.type";
 import { CounsellorService } from "../../services/admin/counsellor.service";
 import { GetCounsellorDto } from "../../dto/get-counsellor.dto";
 import { UpdateCounsellorDto } from "../../dto/update-counsellor.dto";
 import { RegisterUserDto } from "src/auth/dto/register-user.dto";
 import { AssignCounsellorDto } from "src/counsellor/dto/assign-counsellor.dto";
+import { UpdateStatusDto } from "src/counsellor/dto/update-status.dto";
 
 @Controller("/admin/counsellor")
 export class CounsellorController {
@@ -57,5 +57,13 @@ export class CounsellorController {
             message: "Counsellor assign successfully",
             data: await this.CounsellorService.assignCounsellor(id, assignCounsellorDto),
         };
+    }
+
+    @Patch("/update-status/:id")
+    async updateStatus(@Param("id") id: string, @Body() UpdateStatusDto: UpdateStatusDto): Promise<APIResponse> {
+        return {
+            message: "Counsellor status updated successfully",
+            data: await this.CounsellorService.updateStatus(id, UpdateStatusDto)
+        }
     }
 }
