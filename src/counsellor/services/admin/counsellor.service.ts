@@ -13,6 +13,7 @@ import { AuthTypes } from "src/auth/enums/auth.enum";
 import { MailService } from "src/mail/services/mail.service";
 import { AssignCounsellorDto } from "src/counsellor/dto/assign-counsellor.dto";
 import { Journey, JourneyType } from "src/journey/schemas/journey.schema";
+import { UpdateStatusDto } from "src/counsellor/dto/update-status.dto";
 
 @Injectable()
 export class CounsellorService {
@@ -64,7 +65,7 @@ export class CounsellorService {
         const page = GetCounsellorDto?.page ?? 1;
         const skip = pageSize * (page - 1);
         let query = { role: RoleType.COUNSELLOR };
-        query["status"] = true;
+        // query["status"] = true;
 
         if (GetCounsellorDto?.search) {
             const searchQueryString = GetCounsellorDto.search.trim().split(" ").join("|");
@@ -103,6 +104,7 @@ export class CounsellorService {
                     createdAt: 1,
                     updatedAt: 1,
                     patientCount: { $size: "$patient" }, // Count the number of patients for each user
+                    status: 1,
                 },
             },
             {
@@ -124,7 +126,7 @@ export class CounsellorService {
             {
                 $match: {
                     _id: Types.ObjectId.createFromHexString(id),
-                    status: true,
+                    // status: true,
                 },
             },
             {
@@ -149,6 +151,7 @@ export class CounsellorService {
                     createdAt: 1,
                     updatedAt: 1,
                     patientCount: { $size: "$patient" }, // Count the number of patients for each user
+                    status: 1
                 },
             },
         ]);
@@ -163,7 +166,7 @@ export class CounsellorService {
         return await this.counsellorModel.findByIdAndDelete(id);
     }
 
-    async assignCounsellor(id, assignCounsellorDto: AssignCounsellorDto): Promise<any> {
+    async assignCounsellor(id: string, assignCounsellorDto: AssignCounsellorDto): Promise<any> {
         let query: any = {};
 
         if (assignCounsellorDto?.counsellorId) {
@@ -189,6 +192,10 @@ export class CounsellorService {
         const saveJourney = new this.journeyModel(journey);
         await saveJourney.save();
         return await this.patientModel.findByIdAndUpdate(id, query, { new: true });
+    }
+
+    async updateStatus(id: string, UpdateStatusDto: UpdateStatusDto): Promise<any> {
+        return await this.UserModel.findByIdAndUpdate(id, { status: UpdateStatusDto.status }, { new: true }).exec();
     }
 
     private async hashPassword(password: string, salt: string): Promise<String> {
