@@ -97,7 +97,7 @@ export class CounsellorService {
                             },
                         },
                         {
-                            $unwind: "$campaignId",
+                            $unwind: {path: "$campaignId", preserveNullAndEmptyArrays: true},
                         },
                         {
                             $project: {
@@ -119,7 +119,7 @@ export class CounsellorService {
                 $addFields: {
                     lastFollowUp: {
                         $filter: {
-                            input: "$followUp",
+                            input: { $ifNull: ["$followUp", []] },
                             as: "follow",
                             cond: { $lt: ["$$follow.followUpDate", new Date()] }, 
                         },
@@ -127,7 +127,7 @@ export class CounsellorService {
                 },
             },
             {
-                $unwind: "$lastFollowUp",
+                $unwind: {path: "$lastFollowUp", preserveNullAndEmptyArrays: true},
             },
             {
                 $sort: { "lastFollowUp.followUpDate": -1 }, 
@@ -139,7 +139,7 @@ export class CounsellorService {
                 $addFields: {
                     upComingFollowup: {
                         $filter: {
-                            input: "$followUp",
+                            input: { $ifNull: ["$followUp", []] },
                             as: "follow",
                             cond: { $gt: ["$$follow.followUpDate", new Date()] }, 
                         },
@@ -147,7 +147,7 @@ export class CounsellorService {
                 },
             },
             {
-                $unwind: "$upComingFollowup",
+                $unwind: {path: "$upComingFollowup", preserveNullAndEmptyArrays: true},
             },
             {
                 $sort: { "upComingFollowup.followUpDate": -1 }, 
@@ -156,10 +156,10 @@ export class CounsellorService {
                 $limit: 1, 
             },
             {
-                $unwind: "$clinicId",
+                $unwind: {path: "$clinicId", preserveNullAndEmptyArrays: true},
             },
             {
-                $unwind: "$counsellorId",
+                $unwind: {path: "$counsellorId", preserveNullAndEmptyArrays: true},
             },
             {
                 $project: {
