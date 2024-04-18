@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, HttpException, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import mongoose, { Model } from "mongoose";
 import { outcomeSurvey } from "./survey.schema";
@@ -15,6 +15,7 @@ export class SurveyService {
     ) {}
 
     async createSurvey(createSurveyDto: CreateSurveyDTO): Promise<any> {
+        try{
         if (!createSurveyDto.campaignName || !createSurveyDto.outcomeName || !createSurveyDto.campaignId) {
             return {
                 status: 400,
@@ -38,7 +39,10 @@ export class SurveyService {
 
         const campaignDetails = await this.campaignModel.findById(createSurveyDto.campaignId);
         if (!campaignDetails) {
-            throw new Error("Campaign not found");
+            return{
+                status: 400,
+                message: "Campaign not found",
+            }
         }
         const surveyExists = await this.surveyModel.findOne({ campaignId: createSurveyDto.campaignId, isActive: true });
         if (surveyExists) {
@@ -56,6 +60,10 @@ export class SurveyService {
             message: "Survey created successfully",
             data: survey,
         };
+    }
+    catch(error){
+        console.log(error.message)
+    }
     }
 
     async getAllSurvey(): Promise<any> {
