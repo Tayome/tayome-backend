@@ -315,4 +315,24 @@ export class CampaignService {
             data: result,
         };
     }
+    async getAllCampaign(search: string): Promise<any> {
+        try {
+            let query = {}
+            if (search) {
+                query["name"] = { $regex: search, $options: "i" }
+            }
+            const campaigndetails = await this.CampaignModel.find(query).select({ _id: 1, name: 1 });
+            return {
+                message: "Campaign retrieved successfully",
+                data: campaigndetails,
+            };
+        }
+        catch (error) {
+            return {
+                message: error.message,
+            }
+        }
+    }
 }
+
+

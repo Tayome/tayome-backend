@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, MaxFileSizeValidator, ParseFilePipe, Post, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, FileTypeValidator, HttpException, MaxFileSizeValidator, ParseFilePipe, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { CampaignService } from "../services/campaign.service";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { CreateCampaignDto } from "../dto/create-campagin.dto";
@@ -55,5 +55,14 @@ export class CampaignController {
             message: "Campaign retrieved successfully",
             data: res,
         };
+    }
+
+    @Post("/CampaignSearch")
+    async getAllCampaign(@Query("search") search:string): Promise<any> {
+        try {
+            return await this.campaignService.getAllCampaign(search);
+        } catch (error) {
+            throw new HttpException(error.message, error.statusCode);
+        }
     }
 }
