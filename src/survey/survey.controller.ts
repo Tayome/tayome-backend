@@ -14,10 +14,14 @@ export class SurveyController {
             throw new HttpException(error.message, error.statusCode);
         }
     }
-    @Get("/getAll")
-    async getAllSurvey() {
+    @Get('/getAll')
+    async getAllSurvey(
+        @Query('pageNumber') pageNumber: number,
+        @Query('pageSize') pageSize: number,
+        @Query("search") search:string
+    ) {
         try {
-            return await this.service.getAllSurvey();
+            return await this.service.getAllSurvey(pageNumber, pageSize,search);
         } catch (e) {
             throw new HttpException(e.message, 500);
         }

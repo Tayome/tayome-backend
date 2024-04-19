@@ -66,22 +66,49 @@ export class SurveyService {
     }
     }
 
-    async getAllSurvey(): Promise<any> {
-        const surveyList = await this.surveyModel.find({ isActive: true });
-        if (!surveyList) {
+    async getAllSurvey(pageNumber: number, pageSize: number,search:string): Promise<any> {
+        const skip = (pageNumber - 1) * pageSize; // Calculate number of documents to skip
+        
+        const query = { isActive: true };
+    
+        try {
+            if(search?.length>0){
+                query["$or"] = [
+                    { outcomeName: { $regex: search, $options: "i" } }, 
+                    { campaignName: { $regex: search, $options: "i" } }
+                ];
+            }
+            console.log(query)
+            const totalSurveys = await this.surveyModel.countDocuments(query);
+            const surveyList = await this.surveyModel
+                .find(query)
+                .skip(skip)
+                .limit(pageSize);
+    
+            if (!surveyList || surveyList.length === 0) {
+                return {
+                    status: 404,
+                    message: "No surveys found",
+                    data: [],
+                    totalItems: totalSurveys
+                };
+            } else {
+                return {
+                    status: 200,
+                    message: "Surveys fetched successfully",
+                    data: surveyList,
+                    totalItems: totalSurveys
+                };
+            }
+        } catch (error) {
             return {
-                status: 404,
-                message: "No survey Exists",
-                data: [],
-            };
-        } else {
-            return {
-                status: 200,
-                message: "Data fetched successfully",
-                data: surveyList,
+                status: 500,
+                message: "Internal server error",
+                error: error.message
             };
         }
     }
+    
 
     async getSurveyById(surveyId: string): Promise<any> {
         const ckeckvalidId = mongoose.Types.ObjectId.isValid(surveyId);
