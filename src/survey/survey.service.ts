@@ -4,14 +4,26 @@ import mongoose, { Model } from "mongoose";
 import { outcomeSurvey } from "./survey.schema";
 import { CreateSurveyDTO } from "./dto/create.survey.dto";
 import { Campaign } from "src/campaign/schemas/campaign.schema";
+import { firstValueFrom } from "rxjs";
+import { HttpService } from "@nestjs/axios";
 
 @Injectable()
 export class SurveyService {
+    private readonly apiHeaders = {
+        "Content-Type": "application/json",
+        apikey: process.env.API_KEY,
+        // Add any other headers you need
+    };
+
+    private readonly apiBaseUrl = "https://api.pinbot.ai/v2/wamessage/sendMessage";
+    private readonly apiCampaignUrl = "https://console.pinbot.ai/api/create-template";
+
     constructor(
         @InjectModel(outcomeSurvey.name)
         private readonly surveyModel: Model<outcomeSurvey>,
         @InjectModel(Campaign.name)
         private readonly campaignModel: Model<Campaign>,
+        private readonly httpService: HttpService,
     ) {}
 
     async createSurvey(createSurveyDto: CreateSurveyDTO): Promise<any> {
@@ -45,6 +57,36 @@ export class SurveyService {
             }
         }
         const surveyExists = await this.surveyModel.findOne({ campaignId: createSurveyDto.campaignId, isActive: true });
+
+
+        // createCampaignDto.weekData.map(async (item, index) => {
+        //     const templateData = {
+        //         name: "campaign" + (Math.floor(Math.random() * 10000) + 10000).toString().substring(1),
+        //         language: "en",
+        //         category: "MARKETING",
+        //         structure: {
+        //             header: {
+        //                 format: "IMAGE",
+        //                 mediaurl: item["file"],
+        //             },
+        //             body: item["content"],
+        //         },
+        //     };
+
+        //     const headers = this.apiHeaders;
+
+        //     try {
+        //         const temp_res = await firstValueFrom(this.httpService.post(this.apiCampaignUrl, templateData, { headers }));
+        //         item["templateId"] = temp_res.data.data.templateid;
+        //     } catch (error) {
+        //         console.error("Error fetching template data:", error.message);
+        //         // Handle the error as needed
+        //         item["templateId"] = null; // Or any default value
+        //     }
+
+        //     return item;
+        // }),
+
         if (surveyExists) {
             const updatedSurvey = await this.surveyModel.findOneAndUpdate({ _id: surveyExists._id }, createSurveyDto, { new: true });
             return {
@@ -78,7 +120,6 @@ export class SurveyService {
                     { campaignName: { $regex: search, $options: "i" } }
                 ];
             }
-            console.log(query)
             const totalSurveys = await this.surveyModel.countDocuments(query);
             const surveyList = await this.surveyModel
                 .find(query)

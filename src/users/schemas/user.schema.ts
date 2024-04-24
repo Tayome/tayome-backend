@@ -52,6 +52,9 @@ export class User {
   @Prop()
   password: String;
 
+  @Prop({required:false})
+  index: number;
+
   validatePassword: Function;
 }
 

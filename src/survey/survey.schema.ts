@@ -39,6 +39,14 @@ export class outcomeSurvey extends Document {
     @IsArray()
     @IsNotEmpty()
     outcomeSurveyQnA: Questions;
+
+    @Prop({ required:false })
+    firstWeekTemplateId: string;
+
+    @Prop({ required:false })
+    lastWeekTemplateId: string;
+
+
 }
 
 export const OutcomeSchema = SchemaFactory.createForClass(outcomeSurvey);

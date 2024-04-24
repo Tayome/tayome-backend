@@ -8,6 +8,8 @@ import { Patients } from "../schemas/patients.schema";
 import { PatientsListDto } from "../dto/patients-list.dto";
 import { PatienDetailDto } from "../dto/patient-detail.dto";
 import { DiseaseDetail } from "src/disease/schemas/disease-detail.schema";
+import { PatientsManager } from "../schemas/patients.manager.schema";
+import { TransactionService } from "src/utils/services/transaction.service";
 
 @Injectable()
 export class UserService {
@@ -17,6 +19,10 @@ export class UserService {
         @InjectConnection() private readonly connection: Connection,
         @InjectModel(DiseaseDetail.name) private DiseaseDetailModel: Model<DiseaseDetail>,
         private UploadService: UploadService,
+        @InjectModel(PatientsManager.name) private PatientsManagerModel: Model<PatientsManager>,
+        private readonly transactionService: TransactionService,
+
+
     ) {}
 
     async index() {
@@ -35,8 +41,43 @@ export class UserService {
     }
 
     async onboardingUser(onboardingUserDto: OnboardingUserDto): Promise<any> {
+        const session = await this.transactionService.startTransaction();
+
+        try{
         let patientData = new this.PatientModel(onboardingUserDto);
-        return await patientData.save();
+        let patientManager=await this.PatientsManagerModel.findOne({})
+        let userData=await this.UserModel.find({role:"counsellor",status:true}).sort({index:1}).limit(1)
+        if(!patientManager){
+            if(userData?.length>0){
+                patientData.counsellorId=userData[0]?._id?userData[0]?._id:"";
+                patientManager=new this.PatientsManagerModel({CounsellorId:userData[0]._id,counter:userData[0].index})
+            }
+        }
+        else{
+            let userDetails=await this.UserModel.find({role:"counsellor",status:true,index:{$gt:patientManager.counter}}).sort({index:1}).limit(1)
+            if(userDetails?.length>0){
+                patientData.counsellorId=userDetails[0]?._id?userDetails[0]._id:"";
+                patientManager.CounsellorId=userDetails[0]?._id?userDetails[0]?._id:"";
+                patientManager.counter=userDetails[0]?.index;
+            }
+            else{
+                patientData.counsellorId=userData[0]?._id?userData[0]?._id:"";
+                patientManager.CounsellorId=userData[0]?._id?userData[0]?._id:"";
+                patientManager.counter=userData[0]?.index;
+            }
+
+        }
+        await patientManager.save({ session });
+        await patientData.save({ session });
+        await this.transactionService.commitTransaction(session);
+        return patientData
+
+        }
+        catch(error){
+            console.log(error.message)
+            await this.transactionService.abortTransaction(session);
+            throw error;
+        }
     }
 
     async patientsList(patientsListDto: PatientsListDto, user): Promise<any> {
