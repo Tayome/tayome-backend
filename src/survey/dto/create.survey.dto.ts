@@ -38,6 +38,13 @@ export class CreateSurveyDTO {
     @ArrayNotEmpty()
     @ArrayMinSize(1)
     outcomeSurveyQnA: QuestionDTO[];
+
+    @IsString()
+    firstWeekTemplateId: string;
+
+    @IsString()
+    lastWeekTemplateId: string;
+
 }
 
 

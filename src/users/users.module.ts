@@ -7,6 +7,7 @@ import { UtilsModule } from "src/utils/utils.module";
 import { AuthModule } from "src/auth/auth.module";
 import { Patients, PatientsSchema } from "./schemas/patients.schema";
 import { DiseaseDetail, DiseaseDetailSchema } from "src/disease/schemas/disease-detail.schema";
+import { PatientsManager, PatientsManagerSchema } from "./schemas/patients.manager.schema";
 
 @Module({
     imports: [
@@ -15,6 +16,9 @@ import { DiseaseDetail, DiseaseDetailSchema } from "src/disease/schemas/disease-
         MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
         MongooseModule.forFeature([{ name: Patients.name, schema: PatientsSchema }]),
         MongooseModule.forFeature([{ name: DiseaseDetail.name, schema: DiseaseDetailSchema }]),
+        MongooseModule.forFeature([{ name: PatientsManager.name, schema: PatientsManagerSchema}]),
+        UtilsModule
+
     ],
     controllers: [UserController],
     providers: [UserService],

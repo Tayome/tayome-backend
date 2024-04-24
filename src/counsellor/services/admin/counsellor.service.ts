@@ -14,20 +14,28 @@ import { MailService } from "src/mail/services/mail.service";
 import { AssignCounsellorDto } from "src/counsellor/dto/assign-counsellor.dto";
 import { Journey, JourneyType } from "src/journey/schemas/journey.schema";
 import { UpdateStatusDto } from "src/counsellor/dto/update-status.dto";
+import { CounsellorManager } from "src/counsellor/schemas/counsellor.manager.schema";
+import { TransactionService } from "src/utils/services/transaction.service";
 
 @Injectable()
 export class CounsellorService {
     constructor(
         @InjectModel(Counsellor.name) private counsellorModel: Model<Counsellor>,
+        @InjectModel(CounsellorManager.name) private counsellorManagerModel: Model<CounsellorManager>,
         @InjectModel(User.name) private UserModel: Model<User>,
         @InjectModel(Patients.name) private patientModel: Model<Patients>,
         @InjectModel(Journey.name) private journeyModel: Model<Journey>,
         private mailService: MailService,
+        private readonly transactionService: TransactionService,
+
     ) {}
 
     async createCounsellor(registerUserDto: RegisterUserDto): Promise<any> {
+        const session = await this.transactionService.startTransaction();
+        try{
         const salt = await bcrypt.genSalt();
         const password = await this.hashPassword(registerUserDto.password, salt);
+        const counsellorManagerModel=await this.counsellorManagerModel.findOne({});
 
         const createdUser = new this.UserModel({
             type: registerUserDto.type,
@@ -37,11 +45,26 @@ export class CounsellorService {
             [registerUserDto.type]: registerUserDto[registerUserDto.type],
             mobile: registerUserDto?.mobile,
             gender: registerUserDto?.gender,
+            index:counsellorManagerModel?counsellorManagerModel.counter+1:1,
             password,
             salt,
         });
+        if(!counsellorManagerModel){
+            const counsellorManager=new this.counsellorManagerModel({
+                CounsellorId:createdUser._id,
+                counter:1
+            });
+            await counsellorManager.save({ session });
+        }
+        else{
+            counsellorManagerModel.CounsellorId=createdUser._id;
+            counsellorManagerModel.counter=counsellorManagerModel.counter+1;
+            await counsellorManagerModel.save({ session });
+        }
 
-        await createdUser.save();
+        await createdUser.save({ session });
+        await this.transactionService.commitTransaction(session);
+
         createdUser.password = createdUser.salt = undefined; // delete is not working
         if (registerUserDto.type === AuthTypes.EMAIL && registerUserDto?.email) {
             const mailData = {
@@ -58,6 +81,11 @@ export class CounsellorService {
             });
         }
         return createdUser;
+    }
+    catch(error){
+        await this.transactionService.abortTransaction(session);
+        throw error;
+    }
     }
 
     async getCounsellorList(GetCounsellorDto: GetCounsellorDto): Promise<any> {
