@@ -8,6 +8,8 @@ import { OnboardingUserDto } from "../dto/onboarding-user.dto";
 import { PatientsListDto } from "../dto/patients-list.dto";
 import { PatienDetailDto } from "../dto/patient-detail.dto";
 import { GetUser } from "src/auth/decorators/get-user.decorator";
+import { RegisterSubAdminDto } from "src/auth/dto/register-user.dto";
+import { APIResponse } from "src/utils/types/api-response.type";
 
 @Controller("user")
 export class UserController {
@@ -19,6 +21,14 @@ export class UserController {
         return {
             message: "User Onboarded",
             data: userDetails,
+        };
+    }
+
+    @Post("/createSubAdmin")
+    async createSubAdmin(@Body() registerUserDto: RegisterSubAdminDto): Promise<APIResponse> {
+        return {
+            message: "SubAdmin created successfully",
+            data: await this.userService.createSubAdmin(registerUserDto),
         };
     }
 

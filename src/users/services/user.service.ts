@@ -10,6 +10,9 @@ import { PatienDetailDto } from "../dto/patient-detail.dto";
 import { DiseaseDetail } from "src/disease/schemas/disease-detail.schema";
 import { PatientsManager } from "../schemas/patients.manager.schema";
 import { TransactionService } from "src/utils/services/transaction.service";
+import { RegisterSubAdminDto } from "src/auth/dto/register-user.dto";
+import { RoleType } from "src/auth/enums/role.enum";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class UserService {
@@ -87,6 +90,35 @@ export class UserService {
         }
     }
 
+
+    async createSubAdmin(registerUserDto: RegisterSubAdminDto): Promise<any> {
+        const session = await this.transactionService.startTransaction();
+        try{
+        const salt = await bcrypt.genSalt();
+        const password = await this.hashPassword(registerUserDto.password, salt);
+        const createdUser = new this.UserModel({
+            type: registerUserDto.type,
+            role: RoleType.SUBADMIN,
+            firstName: registerUserDto.firstName,
+            lastName: registerUserDto.lastName ?? "",
+            [registerUserDto.type]: registerUserDto[registerUserDto.type],
+            mobile: registerUserDto?.mobile,
+            gender: registerUserDto?.gender,
+            password,
+            salt,
+        });
+        await createdUser.save({ session });
+        await this.transactionService.commitTransaction(session);
+        return createdUser;
+    }
+    catch(error){
+        await this.transactionService.abortTransaction(session);
+        throw error;
+    }
+    }
+    private async hashPassword(password: string, salt: string): Promise<String> {
+        return await bcrypt.hash(password, salt);
+    }
     async patientsList(patientsListDto: PatientsListDto, user): Promise<any> {
         const pageSize = patientsListDto.pageSize ?? 10;
         const page = patientsListDto.page ?? 1;
