@@ -44,6 +44,13 @@ export class UserService {
         const session = await this.transactionService.startTransaction();
 
         try{
+        let checkPhoneNo=await this.PatientModel.findOne({mobile:onboardingUserDto.mobile})
+        if(checkPhoneNo){
+            return {
+                status: false,
+                message: "Phone number already exist"
+            }      
+        }
         let patientData = new this.PatientModel(onboardingUserDto);
         let patientManager=await this.PatientsManagerModel.findOne({})
         let userData=await this.UserModel.find({role:"counsellor",status:true}).sort({index:1}).limit(1)

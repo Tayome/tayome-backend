@@ -21,7 +21,7 @@ export class Patients {
     @Prop({ required: true, type: String })
     countryCode: String;
 
-    @Prop({ required: true, type: String })
+    @Prop({ required: true, type: String,unique:true })
     mobile: String;
 
     @Prop({ required: true, type: SchemaTypes.ObjectId, ref: "DiseaseDetail" })
