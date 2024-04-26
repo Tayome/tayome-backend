@@ -57,36 +57,74 @@ export class SurveyService {
             }
         }
         const surveyExists = await this.surveyModel.findOne({ campaignId: createSurveyDto.campaignId, isActive: true });
+        let firstWeekTemplateIds=[]
+        let lastWeekTemplateIds=[]
+        for(const quesData of createSurveyDto.profilingSurveyQnA){
+            let buttons=[]
+            for(let i=0;i<5;i++){
+                buttons.push({
+                    "text":quesData.answerOptions[i],
+                    "type":"QUICK_REPLY",
+                })
+            }
+            let data = {
+                "name": "profilingsurveyform" + (Math.floor(Math.random() * 10000) + 10000).toString().substring(1),
+                "language": "en",
+                "category": "MARKETING",
+                "structure": {
+                    "body": `${quesData.question}`,
+                    "buttons": buttons,
+                }
+            }
+            const headers = this.apiHeaders;
+    try {
+                const temp_res = await firstValueFrom(this.httpService.post(this.apiCampaignUrl, data, { headers }));
+                if(!temp_res.data.data.templateid){
+                    return {
+                        status: 400,
+                        message: "Template creation failed",
+                    }
+                }
+                firstWeekTemplateIds.push(temp_res.data.data.templateid);
+            } catch (error) {
+                console.error("Error fetching template data:", error.message);
+            }
 
+        }
+        for(const quesData of createSurveyDto.outcomeSurveyQnA){
+            let buttons=[]
+            for(let i=0;i<5;i++){
+                buttons.push({
+                    "text":quesData.answerOptions[i],
+                    "type":"QUICK_REPLY",
+                })
+            }
+            let data = {
+                "name": "outcomesurveyform" + (Math.floor(Math.random() * 10000) + 10000).toString().substring(1),
+                "language": "en",
+                "category": "MARKETING",
+                "structure": {
+                    "body": `${quesData.question}`,
+                    "buttons": buttons,
+                }
+            }
+            const headers = this.apiHeaders;
+    try {
+                const temp_res = await firstValueFrom(this.httpService.post(this.apiCampaignUrl, data, { headers }));
+                if(!temp_res.data.data.templateid){
+                    return {
+                        status: 400,
+                        message: "Template creation failed",
+                    }
+                }
+                lastWeekTemplateIds.push(temp_res.data.data.templateid);
+            } catch (error) {
+                console.error("Error fetching template data:", error.message);
+            }
 
-        // createCampaignDto.weekData.map(async (item, index) => {
-        //     const templateData = {
-        //         name: "campaign" + (Math.floor(Math.random() * 10000) + 10000).toString().substring(1),
-        //         language: "en",
-        //         category: "MARKETING",
-        //         structure: {
-        //             header: {
-        //                 format: "IMAGE",
-        //                 mediaurl: item["file"],
-        //             },
-        //             body: item["content"],
-        //         },
-        //     };
-
-        //     const headers = this.apiHeaders;
-
-        //     try {
-        //         const temp_res = await firstValueFrom(this.httpService.post(this.apiCampaignUrl, templateData, { headers }));
-        //         item["templateId"] = temp_res.data.data.templateid;
-        //     } catch (error) {
-        //         console.error("Error fetching template data:", error.message);
-        //         // Handle the error as needed
-        //         item["templateId"] = null; // Or any default value
-        //     }
-
-        //     return item;
-        // }),
-
+        }
+        createSurveyDto["firstWeekTemplateId"]=firstWeekTemplateIds
+        createSurveyDto["lastWeekTemplateId"]=lastWeekTemplateIds
         if (surveyExists) {
             const updatedSurvey = await this.surveyModel.findOneAndUpdate({ _id: surveyExists._id }, createSurveyDto, { new: true });
             return {
@@ -228,6 +266,88 @@ export class SurveyService {
                 data: [],
             };
         }
+        let checkOptioForProfile = data.profilingSurveyQnA.map(question =>
+            question.answerOptions.some(answer => answer.trim() == "" || answer == null || answer == undefined),
+        );
+
+        let checkOptionForOutcome = data.outcomeSurveyQnA.map(question =>
+            question.answerOptions.some(answer => answer.trim() == "" || answer == null || answer == undefined),
+        );
+
+        if (checkOptioForProfile.includes(true) || checkOptionForOutcome.includes(true)) {
+            return {
+                status: 400,
+                message: "Please fill all the answer options",
+            };
+        }
+        let firstWeekTemplateIds=[]
+        let lastWeekTemplateIds=[]
+        for(const quesData of data.profilingSurveyQnA){
+            let buttons=[]
+            for(let i=0;i<5;i++){
+                buttons.push({
+                    "text":quesData.answerOptions[i],
+                    "type":"QUICK_REPLY",
+                })
+            }
+            let data = {
+                "name": "profilingsurveyform" + (Math.floor(Math.random() * 10000) + 10000).toString().substring(1),
+                "language": "en",
+                "category": "MARKETING",
+                "structure": {
+                    "body": `${quesData.question}`,
+                    "buttons": buttons,
+                }
+            }
+            const headers = this.apiHeaders;
+    try {
+                const temp_res = await firstValueFrom(this.httpService.post(this.apiCampaignUrl, data, { headers }));
+                if(!temp_res.data.data.templateid){
+                    return {
+                        status: 400,
+                        message: "Template creation failed",
+                    }
+                }
+                firstWeekTemplateIds.push(temp_res.data.data.templateid);
+            } catch (error) {
+                console.error("Error fetching template data:", error.message);
+            }
+
+        }
+        for(const quesData of data.outcomeSurveyQnA){
+            let buttons=[]
+            for(let i=0;i<5;i++){
+                buttons.push({
+                    "text":quesData.answerOptions[i],
+                    "type":"QUICK_REPLY",
+                })
+            }
+            let data = {
+                "name": "outcomesurveyform" + (Math.floor(Math.random() * 10000) + 10000).toString().substring(1),
+                "language": "en",
+                "category": "MARKETING",
+                "structure": {
+                    "body": `${quesData.question}`,
+                    "buttons": buttons,
+                }
+            }
+            const headers = this.apiHeaders;
+    try {
+                const temp_res = await firstValueFrom(this.httpService.post(this.apiCampaignUrl, data, { headers }));
+                if(!temp_res.data.data.templateid){
+                    return {
+                        status: 400,
+                        message: "Template creation failed",
+                    }
+                }
+                lastWeekTemplateIds.push(temp_res.data.data.templateid);
+            } catch (error) {
+                console.error("Error fetching template data:", error.message);
+            }
+
+        }
+        data["firstWeekTemplateId"]=firstWeekTemplateIds
+        data["lastWeekTemplateId"]=lastWeekTemplateIds
         const updatedSurvey = await this.surveyModel.findOneAndUpdate({ _id: surveyId }, data, { new: true });
         return {
             status: 200,

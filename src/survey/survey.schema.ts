@@ -41,10 +41,10 @@ export class outcomeSurvey extends Document {
     outcomeSurveyQnA: Questions;
 
     @Prop({ required:false })
-    firstWeekTemplateId: string;
+    firstWeekTemplateId: Array<string>;
 
     @Prop({ required:false })
-    lastWeekTemplateId: string;
+    lastWeekTemplateId: Array<string>;
 
 
 }

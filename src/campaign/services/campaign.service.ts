@@ -17,6 +17,7 @@ import { CampaignSend } from "src/campaignsend/schemas/campaign-send.schema";
 import { firstValueFrom } from "rxjs";
 import { campaignAssignDto } from "../dto/campaign-assign.dto";
 import { Journey, JourneyType } from "src/journey/schemas/journey.schema";
+import { outcomeSurvey } from "src/survey/survey.schema";
 @Injectable()
 export class CampaignService {
     private readonly apiHeaders = {
@@ -35,6 +36,7 @@ export class CampaignService {
         @InjectModel(DiseaseDetail.name) private DiseaseDetailModel: Model<DiseaseDetail>,
         @InjectModel(CampaignSend.name) private CampaignSendModel: Model<CampaignSend>,
         @InjectModel(Journey.name) private JourneyModel: Model<Journey>,
+        @InjectModel(outcomeSurvey.name) private readonly surveyModel: Model<outcomeSurvey>,
         private readonly transactionService: TransactionService,
         private readonly httpService: HttpService,
         private UploadService: UploadService,
@@ -229,8 +231,21 @@ export class CampaignService {
             await this.transactionService.commitTransaction(session);
             let userData = await this.PatientModel.findById(data.userId);
             let campaignData = await this.CampaignModel.findById(data.campaignId);
+            let surveytemplate=await this.surveyModel.distinct("firstWeekTemplateId",{campaignId:data.campaignId,isActive:true})
 
             const sendCampaignToUser = campaignData.weekData.filter(item => item.weekNumber === "1");
+            const headers = this.apiHeaders;
+
+            const textData = {
+                from: process.env.ADMIN_WHATS_APP_NUMBER,
+                to: "91" + userData.mobile,
+                type: "template",
+                header: "Welcome to Tayome",
+                message: {
+                    templateid: sendCampaignToUser[0]["templateId"],
+                    url: sendCampaignToUser[0]["file"],
+                },
+            };
             const templateData = {
                 from: process.env.ADMIN_WHATS_APP_NUMBER,
                 to: "91" + userData.mobile,
@@ -248,19 +263,32 @@ export class CampaignService {
                     ],
                 },
             };
-            const textData = {
-                from: process.env.ADMIN_WHATS_APP_NUMBER,
-                to: "91" + userData.mobile,
-                type: "template",
-                header: "Welcome to Tayome",
-                message: {
-                    templateid: sendCampaignToUser[0]["templateId"],
-                    url: sendCampaignToUser[0]["file"],
-                },
-            };
-            const headers = this.apiHeaders;
             const temp_res = await firstValueFrom(this.httpService.post(this.apiBaseUrl, templateData, { headers }));
             const text_response = await firstValueFrom(this.httpService.post(this.apiBaseUrl, textData, { headers }));
+            if(surveytemplate?.length>0){
+                surveytemplate.forEach(async(ids)=>{
+                    const campaignTemplateData = {
+                        from: process.env.ADMIN_WHATS_APP_NUMBER,
+                        to: "91" + userData.mobile,
+                        type: "template",
+                        header: "Welcome to Tayome",
+                        message: {
+                            templateid: ids,
+                            placeholders: [],
+                            Footer: "www.pinnacle.in",
+                            buttons: [
+                                {
+                                    index: 0,
+                                    type: "quick_reply",
+                                },
+                            ],
+                        },
+                    };
+                    await firstValueFrom(this.httpService.post(this.apiBaseUrl, campaignTemplateData, { headers }));
+
+                })
+
+            }
             // const img_response = await firstValueFrom(this.httpService.post(this.apiBaseUrl, imgData, { headers }));
             let modifyData = campaignData.weekData.map((item, index) => {
                 const sentOnDate = new Date(today);
@@ -332,6 +360,74 @@ export class CampaignService {
                 message: error.message,
             }
         }
+    }
+    async sendSurveyToUser(): Promise<any> {
+        const userData = await this.CampaignAssignModel.aggregate([
+            {
+                $addFields: {
+                    adjustedCreatedAt: {
+                        $dateAdd: {
+                            startDate: "$createdAt",
+                            unit: "month",
+                            amount: 3
+                        }
+                    }
+                }
+            },
+            {
+                $match: {
+                    $expr: {
+                        $eq: [
+                            {
+                                $dateToString: {
+                                    date: "$adjustedCreatedAt",
+                                    format: "%Y-%m-%d"
+                                }
+                            },
+                            {
+                                $dateToString: {
+                                    date: new Date(),
+                                    format: "%Y-%m-%d"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ])
+        const headers = this.apiHeaders;
+        if (userData?.length > 0) {
+            userData.forEach(async campaignAssignData => {
+                let user = await this.PatientModel.findById(campaignAssignData.userId).select({ mobile: 1 })
+                let surveytemplate = await this.surveyModel.findOne({ campaignId: campaignAssignData.campaignId, isActive: true }).select({ lastWeekTemplateId: 1 })
+                if (user && surveytemplate?.lastWeekTemplateId?.length > 0) {
+                    surveytemplate?.lastWeekTemplateId.forEach(async (ids) => {
+                        const campaignTemplateData = {
+                            from: process.env.ADMIN_WHATS_APP_NUMBER,
+                            to: "91" + user.mobile,
+                            type: "template",
+                            header: "Welcome to Tayome",
+                            message: {
+                                templateid: ids,
+                                placeholders: [],
+                                Footer: "www.pinnacle.in",
+                                buttons: [
+                                    {
+                                        index: 0,
+                                        type: "quick_reply",
+                                    },
+                                ],
+                            },
+                        };
+                        await firstValueFrom(this.httpService.post(this.apiBaseUrl, campaignTemplateData, { headers }));
+
+                    })
+
+                }
+            }
+            )
+        }
+
     }
 }
 
