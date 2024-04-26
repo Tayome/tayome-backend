@@ -8,7 +8,7 @@ import { ClinicModule } from "./clinic/clinic.module";
 import { DiseaseModule } from "./disease/disease.module";
 import { CampaignModule } from "./campaign/campaign.module";
 import { ScheduleModule } from "@nestjs/schedule";
-import { CampaignSendModule } from "./campaignsend/campaignsend.module";
+import { SchedularModule } from "./campaignsend/campaignsend.module";
 import { CounsellorModule } from "./counsellor/counsellor.module";
 import { FollowUpModule } from "./followUp/follow-up.module";
 import { JourneyModule } from "./journey/journey.module";
@@ -31,7 +31,7 @@ import { SurveyModule } from './survey/survey.module';
         ClinicModule,
         DiseaseModule,
         CampaignModule,
-        CampaignSendModule,
+        SchedularModule,
         CounsellorModule,
         FollowUpModule,
         JourneyModule,
