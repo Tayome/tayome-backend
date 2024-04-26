@@ -3,6 +3,9 @@ import { Types } from 'mongoose';
 import { IsOptional } from 'class-validator';
 
 export class QuestionDTO {
+    @IsOptional()
+    questionId:string;
+
     @IsNotEmpty()
     @IsString()
     question: string;

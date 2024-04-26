@@ -6,6 +6,10 @@ import { v4 as uuidv4 } from 'uuid';
 export class Questions {
     @Prop({ required: true })
     @IsNotEmpty()
+    questionId: string;
+
+    @Prop({ required: true })
+    @IsNotEmpty()
     question: string;
 
     @Prop({ type: [String], required: false })
