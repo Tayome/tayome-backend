@@ -231,4 +231,41 @@ export class CounsellorService {
         ]);
         return result;
     }
+
+    async patientDetails(id: string): Promise<any> {
+        try {
+            const result = await this.patientModel.aggregate([
+                {
+                    $match: { counsellorId: new Types.ObjectId(id) }
+                },
+                {
+                    $lookup: {
+                        from: "diseasedetails", // Target collection name (assuming it's "diseases")
+                        localField: "medicalCondition",
+                        foreignField: "_id",
+                        as: "medicalConditionDetails"
+                    }
+                },
+                {
+                    $unwind: "$medicalConditionDetails"
+                },
+                {
+                    $project: {
+                        "_id": 1,
+                        "name": 1,
+                        "city": 1,
+                        "countryCode": 1,
+                        "mobile": 1,
+                        "diseaseName": "$medicalConditionDetails.diseaseName" // Extract disease name
+                    }
+                }
+            ]);
+    
+            return result;
+        } catch (error) {
+            console.error("Error fetching patient details:", error);
+            throw error; // Handle or rethrow the error as needed
+        }
+    }
+    
 }
