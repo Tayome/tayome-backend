@@ -32,4 +32,12 @@ export class CounsellorController {
             data: await this.counsellorService.getCampaignList(id)
         }
     }
+
+    @Get("/patientDetails/:id")
+    async patientDetails(@Param("id") id: string): Promise<APIResponse> {
+        return {
+            message: "Patient details fetch successfully",
+            data: await this.counsellorService.patientDetails(id)
+        }
+    }
 }
