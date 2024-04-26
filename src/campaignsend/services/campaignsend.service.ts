@@ -15,6 +15,14 @@ export class SchedularService {
 		  });
 	  }
 
+      CampaignScedularCron = async () => {
+		await this.campaignService.sendCampaignWeeklyDataToUser()
+		  .then(r => r)
+		  .catch(err => {
+			console.error(err)
+		  });
+	  }
+
    
 	 //@Cron("*/30 * * * * *")
      @Cron("0 10 * * *")
@@ -22,4 +30,11 @@ export class SchedularService {
 		console.log(`SurveyCron Running`);
 	  this.SurveyScedularCron();  
 	}
+
+    @Cron("0 11 * * *")
+    // @Cron("*/30 * * * * *")
+    CampaignCron() {
+       console.log(`CampaignCron Running`);
+     this.CampaignScedularCron();  
+   }
 }

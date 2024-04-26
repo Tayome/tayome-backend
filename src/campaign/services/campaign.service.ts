@@ -188,7 +188,6 @@ export class CampaignService {
     async campaignList(campaignListDTO: CampaignListDto): Promise<any> {
         let pipeline = await this.campaignListPipeline(campaignListDTO);
         let data = await this.CampaignModel.aggregate(pipeline);
-        // console.log(data);
         return {
             list: data[0]?.list,
             count: data[0]?.total[0]?.total ? data[0]?.total[0]?.total : 0,
@@ -426,6 +425,57 @@ export class CampaignService {
                 }
             }
             )
+        }
+
+    }
+
+    async sendCampaignWeeklyDataToUser():Promise<any>{
+        for (let i=1;i<=12;i++){
+            let userWeeklyData=await this.CampaignAssignModel.aggregate([
+                {
+                  $addFields: {
+                    adjustedCreatedAt: {
+                      $add: ["$createdAt", { $multiply: [Number(`${7*i}`), 24, 60, 60, 1000] }] // Adding 7 days to createdAt date
+                    }
+                  }
+                },
+                {
+                  $match: {
+                    $expr: {
+                      $eq: [
+                        { $dateToString: { format: "%Y-%m-%d", date: "$adjustedCreatedAt" } }, // Format adjustedCreatedAt as YYYY-MM-DD
+                        { $dateToString: { format: "%Y-%m-%d", date: new Date() } } // Format current date as YYYY-MM-DD
+                      ]
+                    }
+                  }
+                }
+              ])
+              const headers = this.apiHeaders;
+              if (userWeeklyData?.length > 0) {
+                userWeeklyData.forEach(async campaignAssignData => {
+                    let user = await this.PatientModel.findById(campaignAssignData.userId).select({ mobile: 1 })
+                    let campaignData = await this.CampaignModel.findOne({ _id: campaignAssignData.campaignId}).select({ weekData: 1 })
+                    const sendCampaignToUser = campaignData?.weekData?.find(item => (item?.weekNumber).toString() ==(1+i).toString());
+                    if (user && sendCampaignToUser && sendCampaignToUser["templateId"] &&sendCampaignToUser["file"]) {
+                        const textData = {
+                            from: process.env.ADMIN_WHATS_APP_NUMBER,
+                            to: "91" + user.mobile,
+                            type: "template",
+                            header: "Welcome to Tayome",
+                            message: {
+                                templateid: sendCampaignToUser["templateId"],
+                                url: sendCampaignToUser["file"],
+                            },
+                           
+                        };
+                    await firstValueFrom(this.httpService.post(this.apiBaseUrl, textData, { headers }));
+
+    
+                    }
+                }
+                )
+            }
+
         }
 
     }
