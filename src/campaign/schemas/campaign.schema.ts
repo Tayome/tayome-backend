@@ -5,7 +5,7 @@ export type CampaignDocument = HydratedDocument<Campaign>;
 
 @Schema({ timestamps: true })
 export class Campaign {
-    @Prop({ type: String, required: true })
+    @Prop({ type: String, required: true ,unique:true})
     name: string;
 
     @Prop({ type: SchemaTypes.ObjectId, required: true, ref: "Disease" })
