@@ -238,7 +238,7 @@ export class CounsellorService {
             pageNumber=isNaN(pageNumber) ? 1 : pageNumber;
             pageSize=isNaN(pageSize) ? 10 : pageSize;
             const skip = (pageNumber - 1) * pageSize; // Calculate number of documents to skip
-            console.log(pageNumber,pageSize)
+            const count=await this.patientModel.find({ counsellorId: new Types.ObjectId(id) }).count();
             const result = await this.patientModel.aggregate([
                 {
                     $match: { counsellorId: new Types.ObjectId(id) }
@@ -274,7 +274,7 @@ export class CounsellorService {
     
             return {
                 data:result,
-                count:result?.length
+                count:count
             }
         } catch (error) {
             console.error("Error fetching patient details:", error);
