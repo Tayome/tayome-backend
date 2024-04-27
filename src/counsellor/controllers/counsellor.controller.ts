@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
 import { CounsellorService } from "../services/counsellor.service";
 import { APIResponse } from "src/utils/types/api-response.type";
 import { GetPatientListDto } from "../dto/patient-list.dto";
@@ -34,10 +34,13 @@ export class CounsellorController {
     }
 
     @Get("/patientDetails/:id")
-    async patientDetails(@Param("id") id: string): Promise<APIResponse> {
+    async patientDetails(
+        @Query('pageNumber') pageNumber: number,
+        @Query('pageSize') pageSize: number,
+        @Param("id") id: string): Promise<APIResponse> {
         return {
             message: "Patient details fetch successfully",
-            data: await this.counsellorService.patientDetails(id)
+            data: await this.counsellorService.patientDetails(id,pageNumber, pageSize)
         }
     }
 }

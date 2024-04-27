@@ -99,6 +99,7 @@ export class UserService {
         const createdUser = new this.UserModel({
             type: registerUserDto.type,
             role: RoleType.SUBADMIN,
+            isActive:true,
             firstName: registerUserDto.firstName,
             lastName: registerUserDto.lastName ?? "",
             [registerUserDto.type]: registerUserDto[registerUserDto.type],
@@ -115,6 +116,20 @@ export class UserService {
         await this.transactionService.abortTransaction(session);
         throw error;
     }
+    }
+
+    async updateStatus(status:boolean,id:string):Promise<any>{
+        const session = await this.transactionService.startTransaction();
+        try{
+        const updatedUser = await this.UserModel.findByIdAndUpdate(id,{isActive:status},{session})
+        await this.transactionService.commitTransaction(session);
+        return updatedUser;
+    }
+    catch(error){
+        await this.transactionService.abortTransaction(session);
+        throw error;
+    }
+
     }
     private async hashPassword(password: string, salt: string): Promise<String> {
         return await bcrypt.hash(password, salt);

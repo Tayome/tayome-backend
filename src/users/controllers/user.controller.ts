@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { RolesGuard } from "src/auth/roles.guard";
 import { RoleType } from "src/auth/enums/role.enum";
@@ -29,6 +29,14 @@ export class UserController {
         return {
             message: "SubAdmin created successfully",
             data: await this.userService.createSubAdmin(registerUserDto),
+        };
+    }
+
+    @Put("/UpdateStatus/:id")
+    async updateStatus(@Body() body: any ,@Param("id") id:string): Promise<APIResponse> {
+        return {
+            message: "Profile Updated successfully",
+            data: await this.userService.updateStatus(body?.status,id),
         };
     }
 

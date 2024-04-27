@@ -232,8 +232,13 @@ export class CounsellorService {
         return result;
     }
 
-    async patientDetails(id: string): Promise<any> {
+    async patientDetails(id: string,pageNumber: number, pageSize: number,): Promise<any> {
         try {
+
+            pageNumber=isNaN(pageNumber) ? 1 : pageNumber;
+            pageSize=isNaN(pageSize) ? 10 : pageSize;
+            const skip = (pageNumber - 1) * pageSize; // Calculate number of documents to skip
+            console.log(pageNumber,pageSize)
             const result = await this.patientModel.aggregate([
                 {
                     $match: { counsellorId: new Types.ObjectId(id) }
@@ -258,10 +263,19 @@ export class CounsellorService {
                         "mobile": 1,
                         "diseaseName": "$medicalConditionDetails.diseaseName" // Extract disease name
                     }
+                },
+                {
+                    $skip: skip // Skip documents based on pagination
+                },
+                {
+                    $limit: pageSize // Limit the number of documents per page
                 }
             ]);
     
-            return result;
+            return {
+                data:result,
+                count:result?.length
+            }
         } catch (error) {
             console.error("Error fetching patient details:", error);
             throw error; // Handle or rethrow the error as needed
