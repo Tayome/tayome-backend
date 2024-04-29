@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpException, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { RolesGuard } from "src/auth/roles.guard";
 import { RoleType } from "src/auth/enums/role.enum";
@@ -57,5 +57,18 @@ export class UserController {
             message: "Patients detail",
             data: list,
         };
+    }
+
+    @Get('/getAll')
+    async getAllSurvey(
+        @Query('pageNumber') pageNumber: number,
+        @Query('pageSize') pageSize: number,
+        @Query("search") search:string
+    ) {
+        try {
+            return await this.userService.getAllUser(pageNumber, pageSize,search);
+        } catch (e) {
+            throw new HttpException(e.message, 500);
+        }
     }
 }
