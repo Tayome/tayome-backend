@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Post } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Delete, HttpException, Post, Query } from "@nestjs/common";
 import { AddNewDiseaseDto } from "../dto/add-new-disease.dto";
 import { DiseaseService } from "../services/disease.service";
 import { DiseaseListDto } from "../dto/disease-list.dto";
@@ -34,5 +34,13 @@ export class DiseaseController {
             message: "disease details updated",
             data: data,
         };
+    }
+    @Post("/diseaseSearch")
+    async getAllCampaign(@Query("search") search:string): Promise<any> {
+        try {
+            return await this.diseaseService.getAllDiseases(search);
+        } catch (error) {
+            throw new HttpException(error.message, error.statusCode);
+        }
     }
 }

@@ -6,6 +6,7 @@ import { CreateSurveyDTO } from "./dto/create.survey.dto";
 import { Campaign } from "src/campaign/schemas/campaign.schema";
 import { firstValueFrom } from "rxjs";
 import { HttpService } from "@nestjs/axios";
+import { DiseaseDetail } from "src/disease/schemas/disease-detail.schema";
 
 @Injectable()
 export class SurveyService {
@@ -23,12 +24,14 @@ export class SurveyService {
         private readonly surveyModel: Model<outcomeSurvey>,
         @InjectModel(Campaign.name)
         private readonly campaignModel: Model<Campaign>,
+        @InjectModel(DiseaseDetail.name) 
+        private DiseaseDetailModel: Model<DiseaseDetail>,
         private readonly httpService: HttpService,
     ) {}
 
     async createSurvey(createSurveyDto: CreateSurveyDTO): Promise<any> {
         try{
-        if (!createSurveyDto.campaignName || !createSurveyDto.outcomeName || !createSurveyDto.campaignId) {
+        if (!createSurveyDto.diseaseName || !createSurveyDto.outcomeName || !createSurveyDto.diseaseId) {
             return {
                 status: 400,
                 message: "Please fill all the required fields",
@@ -49,14 +52,22 @@ export class SurveyService {
             };
         }
 
-        const campaignDetails = await this.campaignModel.findById(createSurveyDto.campaignId);
-        if (!campaignDetails) {
+        // const campaignDetails = await this.campaignModel.findById(createSurveyDto.campaignId);
+        // if (!campaignDetails) {
+        //     return{
+        //         status: 400,
+        //         message: "Campaign not found",
+        //     }
+        // }
+        const diseasesDetails = await this.DiseaseDetailModel.findById(createSurveyDto.diseaseId);
+        if (!diseasesDetails) {
             return{
                 status: 400,
-                message: "Campaign not found",
+                message: "diseases not found",
             }
         }
-        const surveyExists = await this.surveyModel.findOne({ campaignId: createSurveyDto.campaignId, isActive: true });
+
+        const surveyExists = await this.surveyModel.findOne({ campaignId: createSurveyDto.diseaseId, isActive: true });
         let firstWeekTemplateIds=[]
         let lastWeekTemplateIds=[]
         for(const quesData of createSurveyDto.profilingSurveyQnA){
@@ -155,7 +166,7 @@ export class SurveyService {
             if(search?.length>0){
                 query["$or"] = [
                     { outcomeName: { $regex: search, $options: "i" } }, 
-                    { campaignName: { $regex: search, $options: "i" } }
+                    { diseaseName: { $regex: search, $options: "i" } }
                 ];
             }
             const totalSurveys = await this.surveyModel.countDocuments(query);
@@ -237,7 +248,7 @@ export class SurveyService {
     }
 
     async updateSurveyById(surveyId: string, data: CreateSurveyDTO): Promise<any> {
-        if (!data.campaignName || !data.outcomeName || !data.campaignId) {
+        if (!data.diseaseName || !data.outcomeName || !data.diseaseId) {
             return {
                 status: 400,
                 message: "Please provide all the required data",
@@ -250,11 +261,11 @@ export class SurveyService {
                 message: "Invalid surveyId",
             };
         }
-        const campaignDetails = await this.campaignModel.findById(data.campaignId);
-        if (!campaignDetails) {
+        const diseasesDetails = await this.DiseaseDetailModel.findById(data.diseaseId);
+        if (!diseasesDetails) {
             return {
                 status: 404,
-                message: "Campaign not found",
+                message: "Disease not found",
                 data: [],
             };
         }
@@ -358,7 +369,7 @@ export class SurveyService {
 
     async searchSurvey(search: string): Promise<any> {
         const survey = await this.surveyModel.find({
-            $or: [{ outcomeName: { $regex: search, $options: "i" } }, { campaignName: { $regex: search, $options: "i" } }],
+            $or: [{ outcomeName: { $regex: search, $options: "i" } }, { diseaseName: { $regex: search, $options: "i" } }],
             isActive: true,
         });
         if (survey?.length == 0) {

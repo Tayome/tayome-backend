@@ -20,7 +20,7 @@ export class Questions {
 @Schema({ timestamps: true }) // Enable timestamps (createdAt, updatedAt)
 export class outcomeSurvey extends Document {
     @Prop({ type: SchemaTypes.ObjectId, required: true, ref: "Campaign" })
-    campaignId: Types.ObjectId;
+    diseaseId: Types.ObjectId;
 
     @Prop({ required: true })
     @IsNotEmpty()
@@ -28,7 +28,7 @@ export class outcomeSurvey extends Document {
 
     @Prop({ required:true})  // Consider using a reference here
     @IsNotEmpty()
-    campaignName: string;
+    diseaseName: string;
 
     @Prop({ required: true,default:true })
     @IsNotEmpty()
