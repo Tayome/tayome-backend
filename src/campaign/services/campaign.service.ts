@@ -48,11 +48,7 @@ export class CampaignService {
 
     async createNewCampaign(createCampaignDto: CreateCampaignDto, images: Array<Express.Multer.File>): Promise<any> {
         // const imageData = await this.UploadService.upload(image.buffer, "campaign/", image.originalname);
-        // const checkExistCampaign=await this.CampaignModel.findOne({diseaseId:createCampaignDto.diseaseId})
-        // if(checkExistCampaign){
-
-        // }
-
+        const checkExistCampaign=await this.CampaignModel.findOne({diseaseId:createCampaignDto.diseaseId})
         const imageData1 = await Promise.all(
             images.map(async (item, index) => {
                 const im = await this.UploadService.upload(item.buffer, "campaign/", item.originalname, item.mimetype);
@@ -97,6 +93,12 @@ export class CampaignService {
         );
 
         createCampaignDto.weekData = ReswithTemplate;
+        if(checkExistCampaign){
+            return {
+                message: "Campaign Updated successfully",
+                data: await this.CampaignModel.updateOne({diseaseId:createCampaignDto.diseaseId},createCampaignDto,{new:true})
+        }
+    }
         let createCampaignDetails = new this.CampaignModel(createCampaignDto);
         let data = await createCampaignDetails.save();
         return {
