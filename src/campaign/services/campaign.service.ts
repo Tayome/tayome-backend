@@ -236,7 +236,7 @@ export class CampaignService {
             await this.transactionService.commitTransaction(session);
             let userData = await this.PatientModel.findById(data.userId);
             let campaignData = await this.CampaignModel.findById(data.campaignId);
-            let surveytemplate=await this.surveyModel.distinct("firstWeekTemplateId",{campaignId:data.campaignId,isActive:true})
+            let surveytemplate=await this.surveyModel.distinct("firstWeekTemplateId",{diseaseId:userData.medicalCondition,isActive:true})
 
             const sendCampaignToUser = campaignData.weekData.filter(item => item.weekNumber === "1");
             const headers = this.apiHeaders;
@@ -403,8 +403,8 @@ export class CampaignService {
         const headers = this.apiHeaders;
         if (userData?.length > 0) {
             userData.forEach(async campaignAssignData => {
-                let user = await this.PatientModel.findById(campaignAssignData.userId).select({ mobile: 1 })
-                let surveytemplate = await this.surveyModel.findOne({ campaignId: campaignAssignData.campaignId, isActive: true }).select({ lastWeekTemplateId: 1 })
+                let user = await this.PatientModel.findById(campaignAssignData.userId).select({ mobile: 1,medicalCondition:1 })
+                let surveytemplate = await this.surveyModel.findOne({ diseaseId: user.medicalCondition, isActive: true }).select({ lastWeekTemplateId: 1 })
                 if (user && surveytemplate?.lastWeekTemplateId?.length > 0) {
                     surveytemplate?.lastWeekTemplateId.forEach(async (ids) => {
                         const campaignTemplateData = {
