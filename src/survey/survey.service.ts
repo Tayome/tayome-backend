@@ -67,7 +67,7 @@ export class SurveyService {
             }
         }
 
-        const surveyExists = await this.surveyModel.findOne({ campaignId: createSurveyDto.diseaseId, isActive: true });
+        const surveyExists = await this.surveyModel.findOne({ diseaseId: createSurveyDto.diseaseId, isActive: true });
         let firstWeekTemplateIds=[]
         let lastWeekTemplateIds=[]
         for(const quesData of createSurveyDto.profilingSurveyQnA){
