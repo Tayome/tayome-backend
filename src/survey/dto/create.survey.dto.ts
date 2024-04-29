@@ -16,9 +16,9 @@ export class QuestionDTO {
 }
 
 export class CreateSurveyDTO {
-    @IsMongoId({ message: "Invalid campaign id" })
+    @IsMongoId({ message: "Invalid disease id" })
     @IsNotEmpty()
-    campaignId: Types.ObjectId;
+    diseaseId: Types.ObjectId;
 
     @IsNotEmpty()
     @IsString()
@@ -26,7 +26,7 @@ export class CreateSurveyDTO {
 
     @IsNotEmpty()
     @IsString()
-    campaignName: string;
+    diseaseName: string;
 
     @IsBoolean()
     @IsOptional()

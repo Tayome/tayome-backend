@@ -67,4 +67,23 @@ export class DiseaseService {
         if (!updatedDisease) throw new BadRequestException("Unable to update / Invalid details passed");
         return updatedDisease;
     }
+
+    async getAllDiseases(search: string): Promise<any> {
+        try {
+            let query = {}
+            if (search) {
+                query["diseaseName"] = { $regex: search, $options: "i" }
+            }
+            const diseaseDetails = await this.DiseaseDetailModel.find(query).select({ _id: 1, diseaseName: 1 });
+            return {
+                message: "Diseases retrieved successfully",
+                data: diseaseDetails,
+            };
+        }
+        catch (error) {
+            return {
+                message: error.message,
+            }
+        }
+    }
 }

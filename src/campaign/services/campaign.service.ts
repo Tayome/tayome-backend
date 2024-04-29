@@ -48,6 +48,10 @@ export class CampaignService {
 
     async createNewCampaign(createCampaignDto: CreateCampaignDto, images: Array<Express.Multer.File>): Promise<any> {
         // const imageData = await this.UploadService.upload(image.buffer, "campaign/", image.originalname);
+        // const checkExistCampaign=await this.CampaignModel.findOne({diseaseId:createCampaignDto.diseaseId})
+        // if(checkExistCampaign){
+
+        // }
 
         const imageData1 = await Promise.all(
             images.map(async (item, index) => {
