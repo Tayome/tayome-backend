@@ -175,4 +175,46 @@ export class UserService {
         // };
         return user;
     }
+
+    async getAllUser(pageNumber: number, pageSize: number,search:string): Promise<any> {
+        const skip = (pageNumber - 1) * pageSize; // Calculate number of documents to skip
+        
+        const query = {};
+    
+        try {
+            if(search?.length>0){
+                query["$or"] = [
+                    { firstName: { $regex: search, $options: "i" } }, 
+                    { lastName: { $regex: search, $options: "i" } }
+                ];
+            }
+            const totalUser = await this.UserModel.countDocuments(query);
+            const UserList = await this.UserModel
+                .find(query)
+                .skip(skip)
+                .limit(pageSize);
+    
+            if (!UserList || UserList?.length === 0) {
+                return {
+                    status: 404,
+                    message: "No Sub-admin found",
+                    data: [],
+                    totalItems: totalUser
+                };
+            } else {
+                return {
+                    status: 200,
+                    message: "Sub-admin fetched successfully",
+                    data: UserList,
+                    totalItems: totalUser
+                };
+            }
+        } catch (error) {
+            return {
+                status: 500,
+                message: "Internal server error",
+                error: error.message
+            };
+        }
+    }
 }
