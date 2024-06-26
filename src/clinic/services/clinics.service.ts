@@ -20,7 +20,7 @@ export class ClinicsService {
     }
 
     async generateQRCode(clinicDetails: Object): Promise<any> {
-        let text = "https://tayome.hkstest.uk/app/form/" + clinicDetails["_id"];
+        let text = "https://admin.tayome.net/app/form/" + clinicDetails["_id"];
         let qrBuffer = await QRCode.toBuffer(text);
         let uploadData = await this.UploadService.upload(qrBuffer, "qrCode/", clinicDetails["clinicName"] + ".png");
         return uploadData.Location;
