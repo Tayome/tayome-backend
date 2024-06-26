@@ -33,15 +33,30 @@ export class User {
 
   @Prop({ type: String })
   picture: String;
+  
+  @Prop({ type: String })
+  gender: string;
+
+  @Prop({ type: Boolean, default: false })
+  assigned: boolean;
 
   @Prop({ required: true, default: "user", enum: RoleType })
   role: String;
+
+  @Prop({ required: false, default:true})
+  isActive: boolean;
+
+  @Prop({ type: Boolean, default: true})
+  status: boolean;
 
   @Prop()
   salt: String;
 
   @Prop()
   password: String;
+
+  @Prop({required:false})
+  index: number;
 
   validatePassword: Function;
 }

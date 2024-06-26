@@ -117,6 +117,9 @@ export class AuthService {
 
     async validateUser(type: string, loginString: string, password: string): Promise<any> {
         const user = await this.UserModel.findOne({ [type]: loginString }).exec();
+        if(user.role=="sub-admin" && !user?.status){
+            return false
+        }
         if (user) {
             const passwordMatches = await user.validatePassword(password);
 

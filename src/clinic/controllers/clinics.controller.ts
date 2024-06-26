@@ -5,6 +5,7 @@ import { RolesGuard } from 'src/auth/roles.guard';
 import { RoleType } from 'src/auth/enums/role.enum';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { AddNewClinicDto } from '../dto/add-new-clinic.dto';
+import { ClinicsListDto } from '../dto/clinics-list.dto';
 
 @Controller('clinic')
 export class ClinicsController {
@@ -29,8 +30,8 @@ export class ClinicsController {
     @Post("/list")
     // @UseGuards(AuthGuard(), RolesGuard)
     // @Roles(RoleType.ADMIN)
-    async clinicsList(): Promise<{message: String, data: any }>{
-        let clinicsList = await this.clinicService.clinicsList();        
+    async clinicsList(@Body() clinicsListDto: ClinicsListDto): Promise<{message: String, data: any }>{
+        let clinicsList = await this.clinicService.clinicsList(clinicsListDto);        
         return {
             message: "Clinics list",
             data: clinicsList
