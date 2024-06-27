@@ -220,7 +220,11 @@ export class CampaignService {
                 camp_id = assignCampaignDto.campaignId;
             } else {
                 camp_id = await this.CampaignModel.findOne({ diseaseId: assignCampaignDto.diseaseId }, { _id: 1 });
+                if(!camp_id){
+                    throw new Error("Campaign not Exist for this Disease")
+                }
                 camp_id = camp_id["id"];
+
             }
             let addDetails = new this.CampaignAssignModel({ userId: assignCampaignDto.userId, campaignId: camp_id });
             let data = await addDetails.save({ session });
