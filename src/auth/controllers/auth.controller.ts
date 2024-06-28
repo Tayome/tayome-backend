@@ -9,7 +9,7 @@ import { LoginDto } from "../dto/login.dto";
 import { AuthGuard } from "@nestjs/passport";
 import { ConfigService } from "@nestjs/config";
 import { AuthTypes } from "../enums/auth.enum";
-import { ResetPasswordDto } from "../dto/reset-password.dto";
+import { ResetPasswoordDto, ResetPasswordDto } from "../dto/reset-password.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -142,4 +142,14 @@ export class AuthController {
     @HttpCode(200)
     @Post("/logout")
     async logout() {}
+
+    @HttpCode(200)
+    @Post("/resetPassword")
+    async resetPasswoord(@Body() resetPasswordDto: ResetPasswoordDto) {
+        const reset = await this.authService.resetPasswoord(resetPasswordDto);
+        return {
+            message: "Reset password link shared",
+            data: reset,
+        };
+    }
 }

@@ -22,3 +22,10 @@ export class ResetPasswordDto {
     @IsMongoId()
     otpVerificationCode: string;
 }
+
+export class ResetPasswoordDto {
+    @Transform(param => param.value.toLowerCase())
+    @IsEmail()
+    @MaxLength(255)
+    email: string;
+}

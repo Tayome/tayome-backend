@@ -11,9 +11,11 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
 import { FacebookStrategy } from "./strategies/facebook.strategy";
 import { HttpModule } from "@nestjs/axios";
 import { UtilsModule } from "src/utils/utils.module";
+import { MailModule } from "src/mail/mail.module";
 
 @Module({
     imports: [
+        MailModule,
         PassportModule.register({
             defaultStrategy: "jwt",
         }),

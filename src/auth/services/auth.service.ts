@@ -17,7 +17,8 @@ import { Length } from "class-validator";
 import axios from "axios";
 import { HttpService } from "@nestjs/axios";
 import { FacebookClientDetailsDto } from "../dto/facebook-client-details.dto";
-import { ResetPasswordDto } from "../dto/reset-password.dto";
+import { ResetPasswoordDto, ResetPasswordDto } from "../dto/reset-password.dto";
+import { MailService } from "src/mail/services/mail.service";
 
 @Injectable()
 export class AuthService {
@@ -26,6 +27,7 @@ export class AuthService {
         @InjectModel(User.name) private UserModel: Model<User>,
         private JwtService: JwtService,
         private readonly httpService: HttpService,
+        private mailService: MailService,
     ) {}
 
     async createOtp(requestOtpDto: RequestOtpDto): Promise<void | Number> {
@@ -238,4 +240,48 @@ export class AuthService {
 
         return otp;
     }
-}
+
+    async resetPasswoord(resetPasswordDto: ResetPasswoordDto): Promise<any> {
+        try {
+          const user = await this.UserModel.findOne({ email: resetPasswordDto.email, role: 'admin' }).exec();
+    
+          if (!user) {
+            throw new BadRequestException("Email doesn't exist");
+          }
+              const newPassword = this.generatePassword();
+    
+          user.password = await this.hashedPassword(newPassword);
+          await user.save();
+    
+          const dataForMail = { email: user.email, password: newPassword };
+    
+          this.mailService.sendMail({
+            to: resetPasswordDto.email.toString(),
+            subject: 'New-Credentials',
+            template: 'new-credentials',
+            context: dataForMail,
+          });
+    
+          return { message: 'Password reset and email sent successfully' };
+    
+        } catch (error) {
+          throw error;
+        }
+      }
+    
+      generatePassword(length: number = 12): string {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
+        let password = '';
+        for (let i = 0; i < length; i++) {
+          password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return password;
+      }
+    
+      async hashedPassword(password: string): Promise<string> {
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        return hashedPassword;
+      }
+    }
+
