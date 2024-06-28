@@ -72,6 +72,7 @@ export class CounsellorService {
                 lastName: registerUserDto?.lastName ?? "",
                 email: registerUserDto?.email,
                 password: registerUserDto.password,
+                link:process.env.ADMIN_URL,
             };
             this.mailService.sendMail({
                 to: registerUserDto.email,

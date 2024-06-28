@@ -261,7 +261,7 @@ export class CampaignService {
                 type: "template",
                 header: "Welcome to Tayome",
                 message: {
-                    templateid: "107995",
+                    templateid: "307649",
                     placeholders: [],
                     Footer: "www.pinnacle.in",
                     buttons: [
