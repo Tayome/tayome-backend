@@ -131,10 +131,13 @@ export class UserService {
         const skip = pageSize * (page - 1);
         let sort = {};
         let query;
+        let countQuery;
         if (user.role == "admin") {
             query = this.PatientModel.find();
+            countQuery = this.PatientModel.countDocuments();
         } else {
             query = this.PatientModel.find({ counsellorId: user.id });
+            countQuery = this.PatientModel.countDocuments({ counsellorId: user.id });
         }
         if (patientsListDto.name) {
             // Add name search to the query
@@ -150,7 +153,7 @@ export class UserService {
             .populate("medicalCondition")
             .exec();
 
-        const count = await query.count();
+        const count = await countQuery;
 
         return {
             list: patient,
