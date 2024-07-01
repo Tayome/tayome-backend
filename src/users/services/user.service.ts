@@ -24,8 +24,6 @@ export class UserService {
         private UploadService: UploadService,
         @InjectModel(PatientsManager.name) private PatientsManagerModel: Model<PatientsManager>,
         private readonly transactionService: TransactionService,
-
-
     ) {}
 
     async index() {
@@ -46,90 +44,83 @@ export class UserService {
     async onboardingUser(onboardingUserDto: OnboardingUserDto): Promise<any> {
         const session = await this.transactionService.startTransaction();
 
-        try{
-        let checkPhoneNo=await this.PatientModel.findOne({mobile:onboardingUserDto.mobile})
-        if(checkPhoneNo){
-            return {
-                status: false,
-                message: "Phone number already exist"
-            }      
-        }
-        let patientData = new this.PatientModel(onboardingUserDto);
-        let patientManager=await this.PatientsManagerModel.findOne({})
-        let userData=await this.UserModel.find({role:"counsellor",status:true}).sort({index:1}).limit(1)
-        if(!patientManager){
-            if(userData?.length>0){
-                patientData.counsellorId=userData[0]?._id?userData[0]?._id:"";
-                patientManager=new this.PatientsManagerModel({CounsellorId:userData[0]._id,counter:userData[0].index})
+        try {
+            let checkPhoneNo = await this.PatientModel.findOne({ mobile: onboardingUserDto.mobile });
+            if (checkPhoneNo) {
+                return {
+                    status: false,
+                    message: "Phone number already exist",
+                };
             }
-        }
-        else{
-            let userDetails=await this.UserModel.find({role:"counsellor",status:true,index:{$gt:patientManager.counter}}).sort({index:1}).limit(1)
-            if(userDetails?.length>0){
-                patientData.counsellorId=userDetails[0]?._id?userDetails[0]._id:"";
-                patientManager.CounsellorId=userDetails[0]?._id?userDetails[0]?._id:"";
-                patientManager.counter=userDetails[0]?.index;
+            let patientData = new this.PatientModel(onboardingUserDto);
+            let patientManager = await this.PatientsManagerModel.findOne({});
+            let userData = await this.UserModel.find({ role: "counsellor", status: true }).sort({ index: 1 }).limit(1);
+            if (!patientManager) {
+                if (userData?.length > 0) {
+                    patientData.counsellorId = userData[0]?._id ? userData[0]?._id : "";
+                    patientManager = new this.PatientsManagerModel({ CounsellorId: userData[0]._id, counter: userData[0].index });
+                }
+            } else {
+                let userDetails = await this.UserModel.find({ role: "counsellor", status: true, index: { $gt: patientManager.counter } })
+                    .sort({ index: 1 })
+                    .limit(1);
+                if (userDetails?.length > 0) {
+                    patientData.counsellorId = userDetails[0]?._id ? userDetails[0]._id : "";
+                    patientManager.CounsellorId = userDetails[0]?._id ? userDetails[0]?._id : "";
+                    patientManager.counter = userDetails[0]?.index;
+                } else {
+                    patientData.counsellorId = userData[0]?._id ? userData[0]?._id : "";
+                    patientManager.CounsellorId = userData[0]?._id ? userData[0]?._id : "";
+                    patientManager.counter = userData[0]?.index;
+                }
             }
-            else{
-                patientData.counsellorId=userData[0]?._id?userData[0]?._id:"";
-                patientManager.CounsellorId=userData[0]?._id?userData[0]?._id:"";
-                patientManager.counter=userData[0]?.index;
-            }
-
-        }
-        await patientManager.save({ session });
-        await patientData.save({ session });
-        await this.transactionService.commitTransaction(session);
-        return patientData
-
-        }
-        catch(error){
-            console.log(error.message)
+            await patientManager.save({ session });
+            await patientData.save({ session });
+            await this.transactionService.commitTransaction(session);
+            return patientData;
+        } catch (error) {
+            console.log(error.message);
             await this.transactionService.abortTransaction(session);
             throw error;
         }
     }
 
-
     async createSubAdmin(registerUserDto: RegisterSubAdminDto): Promise<any> {
         const session = await this.transactionService.startTransaction();
-        try{
-        const salt = await bcrypt.genSalt();
-        const password = await this.hashPassword(registerUserDto.password, salt);
-        const createdUser = new this.UserModel({
-            type: registerUserDto.type,
-            role: RoleType.SUBADMIN,
-            isActive:true,
-            firstName: registerUserDto.firstName,
-            lastName: registerUserDto.lastName ?? "",
-            [registerUserDto.type]: registerUserDto[registerUserDto.type],
-            mobile: registerUserDto?.mobile,
-            gender: registerUserDto?.gender,
-            password,
-            salt,
-        });
-        await createdUser.save({ session });
-        await this.transactionService.commitTransaction(session);
-        return createdUser;
-    }
-    catch(error){
-        await this.transactionService.abortTransaction(session);
-        throw error;
-    }
+        try {
+            const salt = await bcrypt.genSalt();
+            const password = await this.hashPassword(registerUserDto.password, salt);
+            const createdUser = new this.UserModel({
+                type: registerUserDto.type,
+                role: RoleType.SUBADMIN,
+                isActive: true,
+                firstName: registerUserDto.firstName,
+                lastName: registerUserDto.lastName ?? "",
+                [registerUserDto.type]: registerUserDto[registerUserDto.type],
+                mobile: registerUserDto?.mobile,
+                gender: registerUserDto?.gender,
+                password,
+                salt,
+            });
+            await createdUser.save({ session });
+            await this.transactionService.commitTransaction(session);
+            return createdUser;
+        } catch (error) {
+            await this.transactionService.abortTransaction(session);
+            throw error;
+        }
     }
 
-    async updateStatus(status:boolean,id:string):Promise<any>{
+    async updateStatus(status: boolean, id: string): Promise<any> {
         const session = await this.transactionService.startTransaction();
-        try{
-        const updatedUser = await this.UserModel.findByIdAndUpdate(id,{isActive:status},{session})
-        await this.transactionService.commitTransaction(session);
-        return updatedUser;
-    }
-    catch(error){
-        await this.transactionService.abortTransaction(session);
-        throw error;
-    }
-
+        try {
+            const updatedUser = await this.UserModel.findByIdAndUpdate(id, { isActive: status }, { session });
+            await this.transactionService.commitTransaction(session);
+            return updatedUser;
+        } catch (error) {
+            await this.transactionService.abortTransaction(session);
+            throw error;
+        }
     }
     private async hashPassword(password: string, salt: string): Promise<String> {
         return await bcrypt.hash(password, salt);
@@ -159,7 +150,12 @@ export class UserService {
             .populate("medicalCondition")
             .exec();
 
-        return patient;
+        const count = await query.count();
+
+        return {
+            list: patient,
+            count: count,
+        };
     }
 
     async patienDetails(patienDetailDto: PatienDetailDto): Promise<any> {
@@ -176,44 +172,38 @@ export class UserService {
         return user;
     }
 
-    async getAllUser(pageNumber: number, pageSize: number,search:string): Promise<any> {
+    async getAllUser(pageNumber: number, pageSize: number, search: string): Promise<any> {
         const skip = (pageNumber - 1) * pageSize; // Calculate number of documents to skip
-        
+
         const query = {};
-    
+
         try {
-            if(search?.length>0){
-                query["$or"] = [
-                    { firstName: { $regex: search, $options: "i" } }, 
-                    { lastName: { $regex: search, $options: "i" } }
-                ];
+            if (search?.length > 0) {
+                query["$or"] = [{ firstName: { $regex: search, $options: "i" } }, { lastName: { $regex: search, $options: "i" } }];
             }
             const totalUser = await this.UserModel.countDocuments(query);
-            const UserList = await this.UserModel
-                .find(query)
-                .skip(skip)
-                .limit(pageSize);
-    
+            const UserList = await this.UserModel.find(query).skip(skip).limit(pageSize);
+
             if (!UserList || UserList?.length === 0) {
                 return {
                     status: 404,
                     message: "No Sub-admin found",
                     data: [],
-                    totalItems: totalUser
+                    totalItems: totalUser,
                 };
             } else {
                 return {
                     status: 200,
                     message: "Sub-admin fetched successfully",
                     data: UserList,
-                    totalItems: totalUser
+                    totalItems: totalUser,
                 };
             }
         } catch (error) {
             return {
                 status: 500,
                 message: "Internal server error",
-                error: error.message
+                error: error.message,
             };
         }
     }
