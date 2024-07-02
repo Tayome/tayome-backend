@@ -240,7 +240,7 @@ export class CampaignService {
             await this.transactionService.commitTransaction(session);
             let userData = await this.PatientModel.findById(data.userId);
             let campaignData = await this.CampaignModel.findById(data.campaignId);
-            let surveytemplate=await this.surveyModel.distinct("firstWeekTemplateId",{diseaseId:userData.medicalCondition,isActive:true})
+            let surveytemplate=await this.surveyModel.distinct("firstWeekTemplateId",{diseaseId:campaignData.diseaseId,isActive:true})
 
             const sendCampaignToUser = campaignData.weekData.filter(item => item.weekNumber === "1");
             const headers = this.apiHeaders;
