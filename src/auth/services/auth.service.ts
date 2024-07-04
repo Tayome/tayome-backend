@@ -248,9 +248,13 @@ export class AuthService {
           if (!user) {
             throw new BadRequestException("Email doesn't exist");
           }
-              const newPassword = this.generatePassword();
+          const salt = await bcrypt.genSalt();
+          const newPassword = this.generatePassword();
+          const hashedPassword = await this.hashPassword(newPassword, salt);
+          user.password=hashedPassword
+          user.salt=salt
+
     
-          user.password = await this.hashedPassword(newPassword);
           await user.save();
     
           const dataForMail = { email: user.email, password: newPassword };
@@ -276,12 +280,6 @@ export class AuthService {
           password += chars.charAt(Math.floor(Math.random() * chars.length));
         }
         return password;
-      }
-    
-      async hashedPassword(password: string): Promise<string> {
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-        return hashedPassword;
       }
     }
 
