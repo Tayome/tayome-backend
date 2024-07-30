@@ -9,10 +9,10 @@ export class ClinicsDetail {
     @Prop({ required: true, type: String })
     clinicName: String;
 
-    @Prop({ required: true, type: String })
+    @Prop({ required: true, type: String,unique:true })
     mobile: String;
 
-    @Prop({ required: true, type: String })
+    @Prop({ required: true, type: String,unique:true })
     email: String;
 
     @Prop({ required: true, type: String })

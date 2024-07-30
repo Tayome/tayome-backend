@@ -449,6 +449,13 @@ export class CampaignService {
                     }
                   }
                 },
+                // {
+                //     $addFields: {
+                //       adjustedCreatedAt: {
+                //         $add: ["$createdAt", { $multiply: [Number(`${2*i}`), 60, 1000] }] // Adding 2 minutes * i to createdAt date
+                //       }
+                //     }
+                //   },
                 {
                   $match: {
                     $expr: {

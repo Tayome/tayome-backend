@@ -1,4 +1,4 @@
-import { IsEmail, Length, Matches, Max, MaxLength, Min } from "class-validator";
+import { IsEmail, IsInt, IsNumber, Length, Matches, Max, MaxLength, Min } from "class-validator";
 
 export class AddNewClinicDto {
     @Length(2,100)
@@ -17,7 +17,9 @@ export class AddNewClinicDto {
     @Length(2,300)
     address: String;
 
-    @Min(111111)
-    @Max(999999)
+    @IsNumber()
+    @IsInt()
+    @Min(100000, { message: 'Pincode must be at least 6 digits' })
+    @Max(999999, { message: 'Pincode must be at most 6 digits' })
     pincode: Number;
 }
