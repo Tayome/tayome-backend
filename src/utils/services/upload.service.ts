@@ -5,20 +5,13 @@ import { v4 as uuidv4 } from "uuid";
 
 @Injectable()
 export class UploadService {
-    private readonly bucketName: string;
-    private readonly s3Client: S3;
+    private bucketName = this.configService.getOrThrow<string>("AWS_S3_BUCKET");
 
-    constructor(private readonly configService: ConfigService) {
-        this.bucketName = this.configService.getOrThrow<string>("DO_SPACES_BUCKET_NAME");
-        this.s3Client = new S3({
-            endpoint: `https://${this.configService.getOrThrow<string>("DO_SPACES_REGION")}.digitaloceanspaces.com`,
-            accessKeyId: this.configService.getOrThrow<string>("DO_SPACES_ACCESS_KEY_ID"),
-            secretAccessKey: this.configService.getOrThrow<string>("DO_SPACES_SECRET_ACCESS_KEY"),
-            region: "us-east-1", // AWS SDK requires a region, but it won't affect DigitalOcean Spaces
-            s3ForcePathStyle: true, // Ensures compatibility with DigitalOcean Spaces
-            signatureVersion: "v4",
-        });
-    }
+    private readonly s3Client = new S3({
+        region: this.configService.getOrThrow<string>("AWS_S3_REGION"),
+    });
+
+    constructor(private readonly configService: ConfigService) {}
 
     async upload(file: Buffer, path: string, fileName: string, mimetype?: string | null) {
         try {
@@ -35,7 +28,7 @@ export class UploadService {
 
             return response;
         } catch (error) {
-            console.log("error",error);
+            console.log("error", error);
             throw new Error("Failed to upload file");
         }
     }
