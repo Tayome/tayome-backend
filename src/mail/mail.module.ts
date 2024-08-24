@@ -16,6 +16,9 @@ import { MailService } from "./services/mail.service";
                         pass: configService.getOrThrow<string>("MAIL_PASSWORD"),
                     },
                     port: parseInt(configService.getOrThrow("MAIL_PORT")),
+                    tls: {
+                        rejectUnauthorized: false, // Allow self-signed certificates
+                    },
                 },
                 defaults: {
                     from: configService.getOrThrow<string>("MAIL_FROM_ADDRESS"),
